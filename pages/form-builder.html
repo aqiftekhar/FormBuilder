@@ -299,6 +299,7 @@
       <!-- End Navbar -->
       <div class="container py-4">
         <div class="row">
+          <form action="" method="post">
           <div class="col-12">
             <div class="card card-wrapper my-4">
               <div class="card-uppar-border"></div>
@@ -306,23 +307,27 @@
                 <div class="border-left"></div>
                 <div class="card-body px-0 pb-2">
                   <div class="ms-md-auto d-flex px-4 align-items-center">
-                    <div class="input-group input-group-outline">
+                    <div class="input-group input-group-outline" id="form_title_div">
                       <input
                         type="text"
                         class="header-title-input"
                         value="Untitle Form"
+                        id="form_title"
+                        required
                       />
                     </div>
                   </div>
 
                   <div class="mt-1">
                     <div class="ms-md-auto d-flex px-4 align-items-center">
-                      <div class="input-group input-group-outline">
+                      <div class="input-group input-group-outline" id="form_description_div">
                         <input
                           type="text"
                           class="header-discription-input"
                           style="width: 100%"
                           placeholder="Field discription"
+                          id="form_description"
+                          required
                         />
                       </div>
                     </div>
@@ -330,8 +335,8 @@
                 </div>
               </div>
             </div>
-            <!-- main form div -->
 
+            
             <div id="div_drager">
               <!-- <div class="card p-3 p-3 my-3">
                 <div class="d-flex justify-content-between">
@@ -377,6 +382,7 @@
             <button
               type="button"
               onclick="addDivElement()"
+              id="btnAdd"
               class="btn bg-gradient-dark mb-0 add addFields"
             >
               <i class="material-icons text-sm">add</i>
@@ -384,13 +390,22 @@
 
             <button
             type="button"
+            id="btnSave"
             onclick="saveFormBuilder()"
             class="btn bg-gradient-dark mb-0 add addFields"
           >
             <i class=" text-sm">Save</i>
           </button>
+
+          <input
+          type="submit"
+          id="btnSubmit"
+          class="btn bg-gradient-dark mb-0 add addFields text-sm"
+        >
+        </input>
             
           </div>
+        </form>
         </div>
         <footer class="footer py-4">
           <div class="container-fluid">

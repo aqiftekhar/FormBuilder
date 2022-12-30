@@ -191,6 +191,17 @@
   padding: 8px 10px;
   background-color: rgba(179, 179, 179, 0.24);
 }
+.question-input-label {
+  border: none;
+  border-bottom: 1px solid gray;
+  border-radius: 0px;
+  outline: none;
+  width: 100%;
+  padding: 8px 10px;
+  font-weight: 900;
+    font-size: 21px;
+  /* background-color: rgba(179, 179, 179, 0.24); */
+}
 .validation {
   background-color: #efbaa3
 }
@@ -221,7 +232,15 @@
   font-size: 24px;
   border-bottom: 1px solid rgb(255, 255, 255);
 }
-
+.header-description-label {
+  font-size: 18px !important;
+  color: #34282C !important;
+}
+.header-title-label {
+  font-size: 26px;
+  font-weight: 800;
+  color: #00008B;
+}
 .header-title-input:focus {
   border: none;
   border-bottom: 1px solid rgba(128, 128, 128, 0.486);
@@ -231,6 +250,17 @@
   background-color: rg;
 }
 
+.date_items {
+  align-items: center;
+  display: inline-flex;
+  font-family: monospace;
+  padding-inline-start: 1px;
+  cursor: default;
+  overflow: hidden;
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .user-input {
   border: none;
   border-bottom: 1px solid rgba(128, 128, 128, 0.486);
@@ -238,6 +268,20 @@
   outline: none;
   width: 60%;
   background-color: rg;
+}
+.input-shape {
+  height: 38px;
+  border-radius: 8px;
+}
+.user-input-label {
+  border: none;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.486);
+  border-radius: 0px;
+  outline: none;
+  width: 60%;
+  background-color: rgba(119, 156, 148, 0.24);
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .radio-input{
@@ -259,6 +303,17 @@
   padding: 8px 10px;
   background-color: rgba(179, 179, 179, 0.24);
 }
+
+.user-textarea-label {
+  border: none;
+  border-bottom: 1px solid gray;
+  border-radius: 0px;
+  outline: none;
+  width: 100%;
+  padding: 8px 10px;
+  background-color: rgba(119, 156, 148, 0.24);
+}
+
 
 .new-radio-option {
   color: #1a73e8;
@@ -359,6 +414,17 @@
 .label-input:hover {
   border-bottom: 1px solid rgba(128, 128, 128, 0.699);
   cursor: text;
+}
+
+.radio-label-label {
+  padding: 2px 3px;
+  margin: 0px 5px;
+  /* width: 100%; */
+  width: 62%;
+  font-size: 16px;
+  font-weight: 400;
+  border: none;
+  border-bottom: 1px solid rgba(128, 128, 128, 0);
 }
 
 .btn-remove {

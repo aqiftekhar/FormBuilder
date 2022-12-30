@@ -69,4 +69,4 @@ function addNewItem() {
   }
 }
 
-btn.addEventListener("click", addNewItem);
+// btn.addEventListener("click", addNewItem);
