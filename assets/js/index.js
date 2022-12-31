@@ -470,7 +470,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         }
       }
       let bodyWrapper = document.getElementById(bodyWrapperId);
-      debugger;
+
       if (element == null) {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
@@ -735,7 +735,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         );
         bodyWrapper.appendChild(hiddenIndexLabel);
         hiddenIndexLabel.setAttribute("type", "hidden");
-        debugger;
+
         for (let index = 0; index <= element.controls.control.length; index++) {
           let radioParentDiv = document.createElement("div");
 
@@ -747,7 +747,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let radioDiv = document.createElement("div");
 
           radioDiv.setAttribute("class", "d-flex align-item-center w-100");
-          debugger;
+
           if (index < element.controls.control.length) {
             radioDiv.setAttribute(
               "id",
@@ -757,7 +757,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             radioDiv.setAttribute(
               "id",
               e.target.parentNode.parentNode.parentNode.id +
-                "_divRadio_" +
+                "_divRadio_NewOption_" +
                 index
             );
           }
@@ -773,7 +773,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           } else {
             getDiv = document.getElementById(
               e.target.parentNode.parentNode.parentNode.id +
-                "_divRadio_" +
+                "_divRadio_NewOption_" +
                 index
             );
           }
@@ -810,7 +810,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             });
 
             // hiddenIndexLabel.value = index + 1;
-            hiddenIndexLabel.value = element.hiddenIndex + 1;
+            // hiddenIndexLabel.value = element.hiddenIndex + 1;
           } else {
             let link = document.createElement("a");
             link.text = "Add Another";
@@ -1008,7 +1008,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             checkboxDiv.setAttribute(
               "id",
               e.target.parentNode.parentNode.parentNode.id +
-                "_divCheckbox_" +
+                "_divCheckbox_NewOption_" +
                 index
             );
           }
@@ -1026,7 +1026,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           } else {
             getCheckboxDiv = document.getElementById(
               e.target.parentNode.parentNode.parentNode.id +
-                "_divCheckbox_" +
+                "_divCheckbox_NewOption_" +
                 index
             );
           }
@@ -1510,10 +1510,10 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
-        debugger;
+
         for (let index = 0; index < element.controls.control.length; index++) {
           let radioYesNoParentDiv = document.createElement("div");
-          debugger;
+
           radioYesNoParentDiv.setAttribute(
             "class",
             "d-flex justify-content-between py-2"
@@ -1891,7 +1891,6 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
   }
 };
 const onInputTypeChange = (e, control, element) => {
-  debugger;
   control.setAttribute("type", e.target.value);
   control.setAttribute("placeholder", "Please enter " + e.target.value);
   let index = builder.find(
@@ -2114,7 +2113,6 @@ const AddNewOption = (
 };
 
 const updateRadioIndex = (e) => {
-  debugger;
   let item = builder.find(
     (card) =>
       card.card_id === e.target.parentNode.parentNode.parentNode.parentNode.id
@@ -2126,7 +2124,6 @@ const updateRadioIndex = (e) => {
 };
 
 const changeInputToLabel = (e, remove, prevValue) => {
-  debugger;
   let parent = document.getElementById(e.target.parentNode.id);
   if (e.target.tagName === "INPUT" && e.target.value === "") {
     e.target.value = prevValue;
@@ -2560,7 +2557,6 @@ const printFormBuilder = () => {
 };
 
 const SaveFormBuilder = () => {
-  debugger;
   builder.forEach((element) => {
     // let card = document.getElementById(element.card_id);
     let question = document.getElementById(element.question_id);
@@ -2577,7 +2573,10 @@ const SaveFormBuilder = () => {
       // card.setAttribute("class", "card p-3 my-3");
     }
   });
+  //convert data to json
   jsonData = JSON.stringify(builder);
+
+  //post data to database
   console.log(jsonData);
   let mainDiv = document.getElementById("div_drager");
   mainDiv.innerHTML = "";
@@ -2586,7 +2585,7 @@ const SaveFormBuilder = () => {
 
 const LoadFormBuilder = () => {
   builder = [];
-
+  //Call API here
   if (jsonData != null) {
     builder = JSON.parse(jsonData);
     let mainDiv = document.getElementById("div_drager");
