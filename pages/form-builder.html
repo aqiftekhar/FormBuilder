@@ -391,12 +391,29 @@
             <button
             type="button"
             id="btnSave"
-            onclick="saveFormBuilder()"
+            onclick="SaveFormBuilder()"
             class="btn bg-gradient-dark mb-0 add addFields"
           >
-            <i class=" text-sm">Save</i>
+            <i class=" text-sm">Save JSON</i>
           </button>
 
+          <button
+          type="button"
+          id="btnSave"
+          onclick="LoadFormBuilder()"
+          class="btn bg-gradient-dark mb-0 add addFields"
+        >
+          <i class=" text-sm">Load JSON</i>
+        </button>
+
+            <button
+            type="button"
+            id="btnSave"
+            onclick="printFormBuilder()"
+            class="btn bg-gradient-dark mb-0 add addFields"
+          >
+            <i class=" text-sm">Print</i>
+          </button>
           <input
           type="submit"
           id="btnSubmit"
