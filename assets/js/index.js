@@ -2391,7 +2391,7 @@ const printFormBuilder = () => {
         label.id = element.controls.control[0].label_id;
 
         let textYes = document.createTextNode(
-          "I understand and agree the terms and conditions"
+          element.controls.control[0].text
         );
 
         label.appendChild(textYes);
