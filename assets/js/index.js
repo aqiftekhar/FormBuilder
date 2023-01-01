@@ -21,13 +21,8 @@ var builder = [];
 var form_details = [];
 var jsonData = "";
 
-class formBuilder {
-  constructor(card_id, question_id, bodyWrapper_id) {
-    this.card_id = card_id;
-    this.question_id = question_id;
-    this.bodyWrapper_id = bodyWrapper_id;
-  }
-}
+const form_builder = document.getElementById("form_builder");
+const form_submit = document.getElementById("form_submit");
 
 const addDivElement = () => {
   const mainDiv = document.getElementById("div_drager");
@@ -1361,26 +1356,6 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           element.controls.control[0].placeholder
         );
         getDateDiv.appendChild(inputDateControl);
-
-        // let card = builder.find(
-        //   (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
-        // );
-        // card.control_type = "Date";
-        // card.hasControls = true;
-
-        // let controls = { control: [] };
-        // let control = new Object();
-        // control.input_div_id =
-        //   e.target.parentNode.parentNode.parentNode.id + "_divDateTime";
-        // control.inputControl_id = inputDateControl.id;
-        // control.inputControl_type = inputDateControl.type;
-        // control.placeholder = inputDateControl.placeholder;
-        // controls.control.push(control);
-
-        // let index = builder.find(
-        //   (card) => card.card_id === e.target.parentNode.parentNode.parentNode.id
-        // );
-        // index.controls = controls;
       }
     } else if (e.target.value === "Time") {
       let bodyWrapper = document.getElementById(bodyWrapperId);
@@ -2038,7 +2013,7 @@ const AddNewOption = (
 
     let AddCheckboxDiv = document.createElement("div");
     let currentIndex = updateRadioIndex(e);
-    currentIndex = currentIndex + 1;
+    // currentIndex = currentIndex + 1;
     AddCheckboxDiv.setAttribute("class", "d-flex align-item-center w-100");
     AddCheckboxDiv.setAttribute(
       "id",
@@ -2248,6 +2223,7 @@ const printFormBuilder = () => {
 
   let mainDiv = document.getElementById("div_drager");
   mainDiv.innerHTML = "";
+
   builder.forEach((element) => {
     if (element.question !== undefined && element.hasControls === true) {
       if (element.control_type === "Input") {
@@ -2390,9 +2366,7 @@ const printFormBuilder = () => {
         let label = document.createElement("label");
         label.id = element.controls.control[0].label_id;
 
-        let textYes = document.createTextNode(
-          element.controls.control[0].text
-        );
+        let textYes = document.createTextNode(element.controls.control[0].text);
 
         label.appendChild(textYes);
         controldiv.appendChild(input);
@@ -2539,7 +2513,10 @@ const printFormBuilder = () => {
           input.type = option.select_control_type;
           input.name = bodyWrapper.id;
 
-          input.required = option.is_requried;
+          if (element.control_type === "Radio") {
+            input.required = option.is_requried;
+          }
+
           let label = document.createElement("label");
           label.id = option.label_id;
           let textYes = document.createTextNode(option.text);
@@ -2554,8 +2531,43 @@ const printFormBuilder = () => {
       }
     }
   });
+  validateCheckboxes({ currentTarget: form_builder });
+  form_builder.addEventListener("change", validateCheckboxes);
 };
-
+const validateCheckboxes = (e) => {
+  let wrappers = Array.from(
+    e.currentTarget.querySelectorAll(":scope .body-wrapper")
+  );
+  builder.forEach((element) => {
+    let control = builder
+      .find((card) => card.card_id === element.card_id)
+      .controls.control.find((x) => x.select_control_type === "checkbox");
+    if (control !== undefined) {
+      if (control.is_requried !== true) {
+        let index = wrappers.indexOf(
+          wrappers.find((x) => x.id === element.bodyWrapperId_id)
+        );
+        if (index > -1) {
+          wrappers.splice(index, 1);
+        }
+      }
+    } else if (control === undefined) {
+      let index = wrappers.indexOf(
+        wrappers.find((x) => x.id === element.bodyWrapperId_id)
+      );
+      if (index > -1) {
+        wrappers.splice(index, 1);
+      }
+    }
+  });
+  form_submit.disabled = wrappers.reduce(
+    (aggr, bodyWrapper) =>
+      aggr ||
+      bodyWrapper.querySelectorAll(":scope input[type=checkbox]:checked")
+        .length < 1,
+    false
+  );
+};
 const SaveFormBuilder = () => {
   builder.forEach((element) => {
     // let card = document.getElementById(element.card_id);
