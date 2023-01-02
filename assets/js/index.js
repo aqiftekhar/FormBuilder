@@ -86,6 +86,7 @@ const addDivElement = () => {
 
   let formCheckId = card + "_requiredId_" + controlId;
   inputCheckBox.id = formCheckId;
+  inputCheckBox.disabled = true;
 
   let object = new Object();
   object.card_id = card;
@@ -195,7 +196,6 @@ const RequiredChanged = (e, control) => {
             });
           } else if (item.type === "checkbox") {
             let parent = document.getElementById(item.name);
-            // parent.required = true;
             parent.setAttribute("required", "required");
             let index = builder.find(
               (card) =>
@@ -328,11 +328,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
 
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
           item.controls = { control: [] };
+          document.getElementById(item.control_require_id).disabled = false;
         }
         let inputParentDiv = document.createElement("div");
         inputParentDiv.setAttribute("class", "d-flex justify-content-between");
@@ -457,7 +466,6 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           onInputTypeChange(e, inputControl);
         });
       }
-      // builder.controls = element.controls;
     } else if (e.target.value === "Multiline Text") {
       if (element !== null) {
         if (element.control_type != e.target.value) {
@@ -470,10 +478,19 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
 
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
+          document.getElementById(item.control_require_id).disabled = false;
           if (item.controls !== undefined) {
             item.controls = { control: [] };
           }
@@ -555,29 +572,6 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           element.controls.control[0].placeholder
         );
         getMultiLineInputDiv.appendChild(textAreaControl);
-
-        let card = builder.find((x) => x.card_id === element.card_id);
-
-        // builder.controls = element.controls;
-        // let card = builder.find(
-        //   (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
-        // );
-        // card.control_type = "Multiline Text";
-        // card.hasControls = true;
-
-        // let controls = { control: [] };
-        // let control = new Object();
-        // control.input_div_id =
-        //   e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput";
-        // control.inputControl_id = textAreaControl.id;
-        // control.inputControl_type = textAreaControl.type;
-        // control.placeholder = textAreaControl.placeholder;
-        // controls.control.push(control);
-
-        // let index = builder.find(
-        //   (card) => card.card_id === e.target.parentNode.parentNode.parentNode.id
-        // );
-        // index.controls = controls;
       }
     } else if (e.target.value === "Radio") {
       if (element !== null) {
@@ -591,11 +585,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
 
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
           item.controls = { control: [] };
+          document.getElementById(item.control_require_id).disabled = false;
         }
 
         let hiddenIndexLabel = document.createElement("input");
@@ -803,9 +806,6 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             removeButton.addEventListener("click", (e) => {
               deleteRadioElement(e, removeButton);
             });
-
-            // hiddenIndexLabel.value = index + 1;
-            // hiddenIndexLabel.value = element.hiddenIndex + 1;
           } else {
             let link = document.createElement("a");
             link.text = "Add Another";
@@ -838,11 +838,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
 
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
           item.controls = { control: [] };
+          document.getElementById(item.control_require_id).disabled = false;
         }
 
         let hiddenIndexLabel = document.createElement("input");
@@ -1030,10 +1039,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             let input = document.createElement("input");
             input.type = "checkbox";
             input.name = bodyWrapper.id;
-            // input.id = getCheckboxDiv.id + "_checkbox_" + index;
             input.id = element.controls.control[index].select_control_id;
             let label = document.createElement("label");
-            // label.id = getCheckboxDiv.id + "_checkboxOption_" + index;
             label.id = element.controls.control[index].label_id;
 
             let textYes = document.createTextNode(
@@ -1092,10 +1099,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       if (element === null) {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
+
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
+          document.getElementById(item.control_require_id).disabled = false;
           item.controls = { control: [] };
         }
 
@@ -1274,10 +1291,18 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       if (element === null) {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
+          document.getElementById(item.control_require_id).disabled = false;
           item.controls = { control: [] };
         }
         let dateParentDiv = document.createElement("div");
@@ -1399,10 +1424,18 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       if (element === null) {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
+          document.getElementById(item.control_require_id).disabled = false;
           item.controls = { control: [] };
         }
 
@@ -1537,10 +1570,18 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       if (element === null) {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
+          document.getElementById(item.control_require_id).disabled = false;
           item.controls = { control: [] };
         }
 
@@ -1667,10 +1708,18 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       if (element === null) {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
           let item = builder.find(
             (card) =>
               card.card_id === e.target.parentNode.parentNode.parentNode.id
           );
+          document.getElementById(item.control_require_id).disabled = false;
           item.controls = { control: [] };
         }
         let multiSelectParentDiv = document.createElement("div");
@@ -1738,13 +1787,6 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         multiSelectControl.multiple = true;
         getMultiSelectDiv.appendChild(multiSelectControl);
 
-        let option = document.createElement("option");
-        option.value = "Choose one option";
-        option.text = "Choose one option";
-        option.disabled = true;
-        option.selected = true;
-        multiSelectControl.appendChild(option);
-
         inputControl.addEventListener("keypress", (e) => {
           enterItemToDropDownList(e, multiSelectControl);
         });
@@ -1765,15 +1807,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         control.select_control_type = multiSelectControl.type;
         control.placeholder = inputControl.placeholder;
 
-        let options = new Object();
-        options.option_text = option.text;
-        options.option_value = option.value;
-        options.option_disabled = option.disabled;
-        options.option_selected = option.selected;
-
         control.options = { option: [] };
 
-        control.options.option.push(options);
         controls.control.push(control);
 
         let index = builder.find(
@@ -1930,7 +1965,6 @@ const AddNewOption = (
 
     let AddRadioDiv = document.createElement("div");
     let currentIndex = updateRadioIndex(e);
-    // currentIndex = currentIndex + 1;
 
     AddRadioDiv.setAttribute("class", "d-flex align-item-center w-100");
     AddRadioDiv.setAttribute(
@@ -2013,7 +2047,6 @@ const AddNewOption = (
 
     let AddCheckboxDiv = document.createElement("div");
     let currentIndex = updateRadioIndex(e);
-    // currentIndex = currentIndex + 1;
     AddCheckboxDiv.setAttribute("class", "d-flex align-item-center w-100");
     AddCheckboxDiv.setAttribute(
       "id",
@@ -2569,39 +2602,118 @@ const validateCheckboxes = (e) => {
   );
 };
 const SaveFormBuilder = () => {
-  builder.forEach((element) => {
-    // let card = document.getElementById(element.card_id);
-    let question = document.getElementById(element.question_id);
+  let is_completed = true;
+  let form_title = document.getElementById("form_title");
+  let form_description = document.getElementById("form_description");
 
-    if (question.value === "") {
-      throw "Please enter question";
-    } else {
+  if (form_title.value === "") {
+    form_title.setAttribute("class", "header-title-input validation");
+    form_title.focus();
+    is_completed = false;
+    throw "Form Title cannot be null";
+  } else if (form_title.value !== "") {
+    form_title.setAttribute("class", "header-title-input");
+  }
+  if (form_description.value === "") {
+    form_description.setAttribute(
+      "class",
+      "header-discription-input validation"
+    );
+    form_description.focus();
+    is_completed = false;
+    throw "Form Title cannot be null";
+  } else if (form_description.value !== "") {
+    form_description.setAttribute("class", "header-discription-input");
+  }
+
+  if (builder.length === 0) {
+    alert("Please create form");
+    throw "Please create form";
+  }
+  builder.forEach((element) => {
+    is_completed = true;
+    let question = document.getElementById(element.question_id);
+    let bodyWrapper = document.getElementById(element.bodyWrapperId_id);
+
+    if (question.value !== "") {
       element.question = question.value;
+    } else if (question.value === "") {
+      is_completed = false;
+      question.setAttribute("class", "question-input validation");
+      throw "value cannot be empty";
     }
 
+    let select_type = document.getElementById(element.selectTag_id);
+    if (select_type.value === "Select" || select_type.selectedIndex === 0) {
+      is_completed = false;
+      select_type.setAttribute("class", "select-control validation");
+      throw "value cannot be empty";
+    } else if (
+      select_type.value !== "Select" ||
+      select_type.selectedIndex !== 0
+    ) {
+      select_type.setAttribute("class", "select-control");
+    }
     if (element.hasControls === undefined) {
-      throw "";
+      if (bodyWrapper.innerHTML === "") {
+        is_completed = false;
+        bodyWrapper.setAttribute("class", "validation-wrapper");
+        throw "value cannot be empty";
+      }
     } else if (element.hasControls !== undefined) {
-      // card.setAttribute("class", "card p-3 my-3");
+      if (element.controls.control.length === 0) {
+        bodyWrapper.setAttribute("class", "validation-wrapper");
+        is_completed = false;
+        throw "value cannot be empty";
+      } else if (element.controls.control.length > 0) {
+        bodyWrapper.setAttribute("class", "body-wrapper");
+      }
     }
   });
-  //convert data to json
-  jsonData = JSON.stringify(builder);
 
-  //post data to database
-  console.log(jsonData);
-  let mainDiv = document.getElementById("div_drager");
-  mainDiv.innerHTML = "";
-  builder = [];
+  //convert data to json
+  if (is_completed) {
+    let forms = {};
+    forms.form_title = form_title.value;
+    forms.form_description = form_description.value;
+    builder[0].forms = forms;
+    jsonData = JSON.stringify(builder);
+    console.log(jsonData);
+    let mainDiv = document.getElementById("div_drager");
+    mainDiv.innerHTML = "";
+    builder = [];
+    //post data to database using API and pass builder as parameter
+  }
 };
 
 const LoadFormBuilder = () => {
   builder = [];
+
   //Call API here
+
   if (jsonData != null) {
     builder = JSON.parse(jsonData);
     let mainDiv = document.getElementById("div_drager");
+    mainDiv.innerHTML = "";
+    let form_title_div = document.getElementById("form_title_div");
+    let form_title = document.getElementById("form_title");
+    let form_title_input = document.createElement("input");
+    form_title_input.id = form_title.id;
 
+    form_title_input.setAttribute("class", "header-title-input");
+
+    let form_description_div = document.getElementById("form_description_div");
+    let form_description = document.getElementById("form_description");
+    let form_description_input = document.createElement("input");
+    form_description_input.id = form_description.id;
+
+    form_description_input.setAttribute("class", "header-discription-input");
+
+    form_title_div.replaceChild(form_title_input, form_title);
+    form_description_div.replaceChild(form_description_input, form_description);
+
+    form_title_input.value = builder[0].forms.form_title;
+    form_description_input.value = builder[0].forms.form_description;
     builder.forEach((element) => {
       createCardFromJSON(mainDiv, element);
     });
@@ -2665,7 +2777,6 @@ const createCardFromJSON = (mainDiv, elements) => {
   );
   inputCheckBox.setAttribute("class", "form-check-input ms-auto");
   inputCheckBox.setAttribute("type", "checkbox");
-
   inputCheckBox.id = elements.control_require_id;
   inputCheckBox.checked = elements.controls.control[0].is_requried;
 

@@ -19,7 +19,13 @@
   /* background-color: rgba(179, 179, 179, 0.24); */
 }
 .validation {
-  background-color: #efbaa3
+  /* background-color: #fcebbd; */
+  background-color: #e1f2fa
+}
+.validation-wrapper {
+  /* border: #fcebbd 1px solid !important; */
+  border: #5e1c44 1px solid !important;
+  padding: 20px 5px !important;
 }
 .box-shadow-validation {
   box-shadow: 0 4px 6px -1px #efbaa3, 0 2px 4px -1px #efbaa3;
