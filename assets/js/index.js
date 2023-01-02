@@ -2691,7 +2691,7 @@ const SaveFormBuilder = () => {
     forms.form_description = form_description.value;
     builder[0].forms = forms;
     jsonData = JSON.stringify(builder);
-    console.log(jsonData);
+    // console.log(jsonData);
     let mainDiv = document.getElementById("div_drager");
     mainDiv.innerHTML = "";
     builder = [];
@@ -2731,7 +2731,7 @@ const LoadFormBuilder = () => {
       createCardFromJSON(mainDiv, element);
     });
 
-    console.log(builder);
+    // console.log(builder);
   }
 };
 
