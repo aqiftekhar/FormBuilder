@@ -1171,12 +1171,12 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         );
         getSelectDiv.appendChild(selectControl);
 
-        let option = document.createElement("option");
-        option.value = "Choose one option";
-        option.text = "Choose one option";
-        option.disabled = true;
-        option.selected = true;
-        selectControl.appendChild(option);
+        // let option = document.createElement("option");
+        // option.value = "Choose one option";
+        // option.text = "Choose one option";
+        // option.disabled = true;
+        // option.selected = true;
+        // selectControl.appendChild(option);
 
         inputControl.addEventListener("keypress", (e) => {
           enterItemToDropDownList(e, selectControl);
@@ -1198,15 +1198,15 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         control.select_control_type = selectControl.type;
         control.placeholder = inputControl.placeholder;
 
-        let options = new Object();
-        options.option_text = option.text;
-        options.option_value = option.value;
-        options.option_disabled = option.disabled;
-        options.option_selected = option.selected;
+        // let options = new Object();
+        // options.option_text = option.text;
+        // options.option_value = option.value;
+        // options.option_disabled = option.disabled;
+        // options.option_selected = option.selected;
 
         control.options = { option: [] };
 
-        control.options.option.push(options);
+        // control.options.option.push(options);
         controls.control.push(control);
 
         let index = builder.find(
@@ -2666,6 +2666,17 @@ const SaveFormBuilder = () => {
         is_completed = false;
         throw "value cannot be empty";
       } else if (element.controls.control.length > 0) {
+        bodyWrapper.setAttribute("class", "body-wrapper");
+      }
+    }
+
+    if( element.control_type === "Multi Select" || element.control_type === "Single Select"){
+      if (element.controls.control[0].options.option.length === 0) {
+        bodyWrapper.setAttribute("class", "validation-wrapper");
+        is_completed = false;
+        throw "value cannot be empty";
+      }
+      else if (element.controls.control[0].options.option.length > 0) {
         bodyWrapper.setAttribute("class", "body-wrapper");
       }
     }
