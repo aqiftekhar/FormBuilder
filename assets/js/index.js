@@ -2670,13 +2670,15 @@ const SaveFormBuilder = () => {
       }
     }
 
-    if( element.control_type === "Multi Select" || element.control_type === "Single Select"){
+    if (
+      element.control_type === "Multi Select" ||
+      element.control_type === "Single Select"
+    ) {
       if (element.controls.control[0].options.option.length === 0) {
         bodyWrapper.setAttribute("class", "validation-wrapper");
         is_completed = false;
         throw "value cannot be empty";
-      }
-      else if (element.controls.control[0].options.option.length > 0) {
+      } else if (element.controls.control[0].options.option.length > 0) {
         bodyWrapper.setAttribute("class", "body-wrapper");
       }
     }
@@ -2700,7 +2702,7 @@ const SaveFormBuilder = () => {
 const LoadFormBuilder = () => {
   builder = [];
 
-  //Call API here
+  //Call API here to load data from database
 
   if (jsonData != null) {
     builder = JSON.parse(jsonData);
