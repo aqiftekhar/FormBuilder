@@ -331,24 +331,26 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       let bodyWrapper = document.getElementById(bodyWrapperId);
 
       if (element === null) {
-        if (bodyWrapper != null) {
-          bodyWrapper.innerHTML = "";
-
-          if (e.target.className === "select-control validation") {
-            e.target.setAttribute("class", "select-control");
-          }
-
-          if (bodyWrapper.className === "validation-wrapper") {
-            bodyWrapper.setAttribute("class", "body-wrapper");
-          }
-
-          let item = builder.find(
-              (card) =>
-                  card.cardId === e.target.parentNode.parentNode.parentNode.id
-          );
-          item.controls = {control: []};
-          document.getElementById(item.controlRequireId).disabled = false;
+        if (bodyWrapper == null) {
+          return
         }
+        bodyWrapper.innerHTML = "";
+
+        if (e.target.className === "select-control validation") {
+          e.target.setAttribute("class", "select-control");
+        }
+
+        if (bodyWrapper.className === "validation-wrapper") {
+          bodyWrapper.setAttribute("class", "body-wrapper");
+        }
+
+        let item = builder.find(
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
+        );
+        item.controls = {control: []};
+        document.getElementById(item.controlRequireId).disabled = false;
+
         let inputParentDiv = document.createElement("div");
         inputParentDiv.setAttribute("class", "d-flex justify-content-between");
 
@@ -482,26 +484,28 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       let bodyWrapper = document.getElementById(bodyWrapperId);
 
       if (element == null) {
-        if (bodyWrapper != null) {
-          bodyWrapper.innerHTML = "";
-
-          if (e.target.className === "select-control validation") {
-            e.target.setAttribute("class", "select-control");
-          }
-
-          if (bodyWrapper.className === "validation-wrapper") {
-            bodyWrapper.setAttribute("class", "body-wrapper");
-          }
-
-          let item = builder.find(
-              (card) =>
-                  card.cardId === e.target.parentNode.parentNode.parentNode.id
-          );
-          document.getElementById(item.controlRequireId).disabled = false;
-          if (item.controls !== undefined) {
-            item.controls = {control: []};
-          }
+        if (bodyWrapper == null) {
+          return;
         }
+        bodyWrapper.innerHTML = "";
+
+        if (e.target.className === "select-control validation") {
+          e.target.setAttribute("class", "select-control");
+        }
+
+        if (bodyWrapper.className === "validation-wrapper") {
+          bodyWrapper.setAttribute("class", "body-wrapper");
+        }
+
+        let item = builder.find(
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
+        );
+        document.getElementById(item.controlRequireId).disabled = false;
+        if (item.controls !== undefined) {
+          item.controls = {control: []};
+        }
+
         let inputParentDiv = document.createElement("div");
         inputParentDiv.setAttribute("class", "d-flex justify-content-between");
 
@@ -549,10 +553,12 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
                 card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
-      } else if (element != null) {
-        if (bodyWrapper != null) {
-          bodyWrapper.innerHTML = "";
+      } else {
+        if (bodyWrapper == null) {
+          return;
         }
+        bodyWrapper.innerHTML = "";
+
         let inputParentDiv = document.createElement("div");
         inputParentDiv.setAttribute("class", "d-flex justify-content-between");
 
@@ -732,7 +738,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             });
           }
         }
-      } else if (element !== null) {
+      } else {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
@@ -848,7 +854,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "Checkbox") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1003,7 +1009,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             });
           }
         }
-      } else if (element !== null) {
+      } else  {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
@@ -1124,7 +1130,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "SingleSelect") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1234,7 +1240,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
                 card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
-      } else if (element !== null) {
+      } else {
         let selectParentDiv = document.createElement("div");
         selectParentDiv.setAttribute("class", "d-flex justify-content-between");
 
@@ -1312,7 +1318,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "Signature") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1351,7 +1357,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "Pathways") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1390,7 +1396,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "Date") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1460,7 +1466,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
                 card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
-      } else if (element !== null) {
+      } else {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
@@ -1523,7 +1529,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       getTimeDiv.appendChild(inputTimeControl);
     } else if (e.target.value === "YesNo") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1624,7 +1630,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             item.controls.control.push(controls.control[0]);
           }
         }
-      } else if (element !== null) {
+      } else {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
@@ -1679,7 +1685,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "IUnderstand") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1774,7 +1780,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
                 card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
-      } else if (element !== null) {
+      } else {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
@@ -1828,7 +1834,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "MultiSelect") {
       if (element !== null) {
-        if (element.controlType != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -1945,7 +1951,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
                 card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
-      } else if (element !== null) {
+      } else {
         if (bodyWrapper != null) {
           bodyWrapper.innerHTML = "";
         }
@@ -2348,6 +2354,9 @@ const editRadioOnClick = (e, remove) => {
 };
 
 const PrintFormBuilder = (jsonData, responsesString, pathwaysString) => {
+  console.log(jsonData)
+  console.log(responsesString)
+  console.log(pathwaysString)
   const responses = JSON.parse(responsesString)
   const pathways = JSON.parse(pathwaysString)
 
@@ -2853,7 +2862,7 @@ const validateCheckboxes = (e) => {
           wrappers.splice(index, 1);
         }
       }
-    } else if (control === undefined) {
+    } else {
       let index = wrappers.indexOf(
           wrappers.find((x) => x.id === element.bodyWrapperIdId)
       );
@@ -2862,13 +2871,15 @@ const validateCheckboxes = (e) => {
       }
     }
   });
-  form_submit.disabled = wrappers.reduce(
-      (aggr, bodyWrapper) =>
-          aggr ||
-          bodyWrapper.querySelectorAll(":scope input[type=checkbox]:checked")
-              .length < 1,
-      false
-  );
+  if (form_submit) {
+    form_submit.disabled = wrappers.reduce(
+        (aggr, bodyWrapper) =>
+            aggr ||
+            bodyWrapper.querySelectorAll(":scope input[type=checkbox]:checked")
+                .length < 1,
+        false
+    );
+  }
 };
 const SaveFormBuilder = () => {
   let is_completed = true;
