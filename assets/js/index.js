@@ -1,30 +1,30 @@
-var cards = 0;
-var control = 0;
-var listControls = [
+var questions = 0;
+const listControls = [
   "Select",
   "Input",
-  "Multiline Text",
+  "MultilineText",
   "Radio",
   "Checkbox",
   "Date",
-  "Yes/No",
-  "I Understand",
-  "Single Select",
-  "Multi Select",
+  "YesNo",
+  "IUnderstand",
+  "SingleSelect",
+  "MultiSelect",
+  "Pathways",
+  "Signature",
 ];
-var inputTypesList = ["text", "name", "email", "phone", "number", "decimal"];
-var listOptions = ["Option 1", "Option 2", "Option 3"];
-var listOptionsYesNo = ["Yes", "No"];
-var current_card = null;
+const inputTypesList = ["text", "name", "email", "phone", "number", "decimal"];
+const listOptions = ["Option 1", "Option 2", "Option 3"];
+const listOptionsYesNo = ["Yes", "No"];
 
 var builder = [];
-var form_details = [];
 var jsonData = "";
 
 const form_builder = document.getElementById("form_builder");
-const form_submit = document.getElementById("form_submit");
+const form_submit = document.getElementById("btnSave");
 
 const addDivElement = () => {
+  questions++;
   const mainDiv = document.getElementById("div_drager");
   var element = document.createElement("div");
   var innerDiv = document.createElement("div");
@@ -39,20 +39,21 @@ const addDivElement = () => {
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
   var formCheck = document.createElement("div");
-  var imgDelete = document.createElement("img");
-
-  let cardId = (cards = cards + 1);
+  var imgDeleteWrapper = document.createElement("div");
+  var imgDelete = document.createElement("i");
+  let cardId = questions;
+  let dbId = crypto.randomUUID();
   let card = "cardDiv_" + cardId;
   element.setAttribute("id", card);
+  element.setAttribute("dbId", dbId)
 
   var input = document.createElement("input");
-  let controlId = (control = control + 1);
+  let controlId = questions;
   let inputId = "inputControl_" + controlId;
   input.value = "Please enter question";
   input.setAttribute("id", inputId);
   input.setAttribute("style", "font-weight: bolder;");
 
-  var select = document.createElement("select");
   selectTag.id = "Select_" + controlId;
 
   let bodyWrapperId = "bodyWrapper_" + controlId;
@@ -68,34 +69,38 @@ const addDivElement = () => {
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
   actionWrapper.setAttribute("class", "action-wrapper");
-  imgDelete.setAttribute("src", "/assets/img/delete-icon.png");
-  imgDelete.setAttribute("width", "20");
+  imgDelete.innerText = "delete"
+  imgDeleteWrapper.setAttribute("class", "text-center me-2 d-flex align-items-center justify-content-center");
+  imgDeleteWrapper.appendChild(imgDelete);
+  imgDelete.setAttribute("class", "material-icons opacity-50");
   footerLabel.setAttribute("class", "footer-label");
   formCheck.setAttribute("class", "form-check form-switch ps-0");
 
   requiredWrapper.setAttribute(
-    "class",
-    "d-flex align-items-center required-wrapper"
+      "class",
+      "d-flex align-items-center required-wrapper"
   );
   footerWrapper.setAttribute(
-    "class",
-    "footer-wrapper d-flex justify-content-end align-items-centerce"
+      "class",
+      "footer-wrapper d-flex justify-content-end align-items-center"
   );
   inputCheckBox.setAttribute("class", "form-check-input ms-auto");
   inputCheckBox.setAttribute("type", "checkbox");
 
-  let formCheckId = card + "_requiredId_" + controlId;
-  inputCheckBox.id = formCheckId;
+  inputCheckBox.id = card + "_requiredId_" + controlId;
   inputCheckBox.disabled = true;
+  inputCheckBox.checked = true;
 
-  let object = new Object();
-  object.card_id = card;
+  let object = {};
+  object.cardId = card;
   object.inputId = inputId;
-  object.question_id = questionInput.id;
-  object.question_placeholder = questionInput.placeholder;
-  object.selectTag_id = selectTag.id;
-  object.control_require_id = inputCheckBox.id;
-  object.bodyWrapperId_id = bodyWrapperId;
+  object.questionId = questionInput.id;
+  object.questionPlaceholder = questionInput.placeholder;
+  object.selectTagId = selectTag.id;
+  object.controlRequireId = inputCheckBox.id;
+  object.bodyWrapperIdId = bodyWrapperId;
+  object.isRequired = inputCheckBox.checked;
+  object.dbId = dbId;
   builder.push(object);
 
   footerLabel.innerHTML = "Required";
@@ -108,7 +113,7 @@ const addDivElement = () => {
   element.appendChild(bodyWrapper);
   element.appendChild(footerWrapper);
   footerWrapper.appendChild(actionWrapper);
-  actionWrapper.appendChild(imgDelete);
+  actionWrapper.appendChild(imgDeleteWrapper);
   footerWrapper.appendChild(requiredWrapper);
   requiredWrapper.appendChild(footerLabel);
   requiredWrapper.appendChild(formCheck);
@@ -119,6 +124,7 @@ const addDivElement = () => {
   });
 
   inputCheckBox.addEventListener("change", (e) => {
+    object.isRequired = e.target.checked;
     RequiredChanged(e, bodyWrapper);
   });
 
@@ -134,19 +140,19 @@ const addDivElement = () => {
   input.addEventListener("focusout", ElementHeaderInput, false);
 
   selectTag.addEventListener(
-    "change",
-    (e) => {
-      selectItemChanged(e, bodyWrapperId, null, null);
-    },
-    false
+      "change",
+      (e) => {
+        selectItemChanged(e, bodyWrapperId, null, null);
+      },
+      false
   );
 };
 const deleteCard = (e, control) => {
-  var shouldDelete = confirm("Do you really want to delete the selected card?");
+  const shouldDelete = confirm("Do you really want to delete the selected question?\nBy deleting this question you will also be deleting all applicant responses to this question.");
   if (shouldDelete) {
     control.remove();
     let item = builder.find(
-      (card) => card.card_id === e.target.parentNode.parentNode.parentNode.id
+        (card) => card.cardId === e.target.parentNode.parentNode.parentNode.parentNode.id
     );
     let index = builder.indexOf(item);
     if (index > -1) {
@@ -156,20 +162,20 @@ const deleteCard = (e, control) => {
 };
 
 const RequiredChanged = (e, control) => {
+  let option = control.parentNode.getElementsByTagName("select")[0];
+  option.isRequired = e.target.checked
   if (e.target.checked) {
-    let option = control.parentNode.getElementsByTagName("select")[0];
-
-    if (option.value === "Single Select" || option.value === "Multi Select") {
+    if (option.value === "SingleSelect" || option.value === "MultiSelect") {
       let select = control.getElementsByTagName("select");
       if (select != null) {
         select[0].required = true;
         let index = builder.find(
-          (card) =>
-            card.card_id ===
-            e.target.parentNode.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId ===
+                e.target.parentNode.parentNode.parentNode.parentNode.id
         );
         index.controls.control.forEach((element) => {
-          element.is_requried = true;
+          element.isRequired = true;
         });
       }
     } else {
@@ -177,33 +183,33 @@ const RequiredChanged = (e, control) => {
       if (inputs != null) {
         for (const item of inputs) {
           if (
-            item.type === "radio" ||
-            item.type === "text" ||
-            item.type === "date" ||
-            item.type === "email" ||
-            item.type === "phone" ||
-            item.type === "number" ||
-            item.type === "decimal"
+              item.type === "radio" ||
+              item.type === "text" ||
+              item.type === "date" ||
+              item.type === "email" ||
+              item.type === "phone" ||
+              item.type === "number" ||
+              item.type === "decimal"
           ) {
             item.required = true;
             let index = builder.find(
-              (card) =>
-                card.card_id ===
-                e.target.parentNode.parentNode.parentNode.parentNode.id
+                (card) =>
+                    card.cardId ===
+                    e.target.parentNode.parentNode.parentNode.parentNode.id
             );
             index.controls.control.forEach((element) => {
-              element.is_requried = true;
+              element.isRequired = true;
             });
           } else if (item.type === "checkbox") {
             let parent = document.getElementById(item.name);
             parent.setAttribute("required", "required");
             let index = builder.find(
-              (card) =>
-                card.card_id ===
-                e.target.parentNode.parentNode.parentNode.parentNode.id
+                (card) =>
+                    card.cardId ===
+                    e.target.parentNode.parentNode.parentNode.parentNode.id
             );
             index.controls.control.forEach((element) => {
-              element.is_requried = true;
+              element.isRequired = true;
             });
             break;
           }
@@ -216,30 +222,29 @@ const RequiredChanged = (e, control) => {
         for (const item of textArea) {
           item.required = true;
           let index = builder.find(
-            (card) =>
-              card.card_id ===
-              e.target.parentNode.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId ===
+                  e.target.parentNode.parentNode.parentNode.parentNode.id
           );
           index.controls.control.forEach((element) => {
-            element.is_requried = true;
+            element.isRequired = true;
           });
         }
       }
     }
   } else if (!e.target.checked) {
-    let option = control.parentNode.getElementsByTagName("select")[0];
 
-    if (option.value === "Single Select" || option.value === "Multi Select") {
+    if (option.value === "SingleSelect" || option.value === "MultiSelect") {
       let select = control.getElementsByTagName("select");
       if (select != null) {
         select[0].required = false;
         let index = builder.find(
-          (card) =>
-            card.card_id ===
-            e.target.parentNode.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId ===
+                e.target.parentNode.parentNode.parentNode.parentNode.id
         );
         index.controls.control.forEach((element) => {
-          element.is_requried = false;
+          element.isRequired = false;
         });
       }
     } else {
@@ -247,33 +252,33 @@ const RequiredChanged = (e, control) => {
       if (inputs != null) {
         for (const item of inputs) {
           if (
-            item.type === "radio" ||
-            item.type === "text" ||
-            item.type === "date" ||
-            item.type === "email" ||
-            item.type === "phone" ||
-            item.type === "number" ||
-            item.type === "decimal"
+              item.type === "radio" ||
+              item.type === "text" ||
+              item.type === "date" ||
+              item.type === "email" ||
+              item.type === "phone" ||
+              item.type === "number" ||
+              item.type === "decimal"
           ) {
             item.required = false;
             let index = builder.find(
-              (card) =>
-                card.card_id ===
-                e.target.parentNode.parentNode.parentNode.parentNode.id
+                (card) =>
+                    card.cardId ===
+                    e.target.parentNode.parentNode.parentNode.parentNode.id
             );
             index.controls.control.forEach((element) => {
-              element.is_requried = false;
+              element.isRequired = false;
             });
           } else if (item.type === "checkbox") {
             let parent = document.getElementById(item.name);
             parent.setAttribute("required", "required");
             let index = builder.find(
-              (card) =>
-                card.card_id ===
-                e.target.parentNode.parentNode.parentNode.parentNode.id
+                (card) =>
+                    card.cardId ===
+                    e.target.parentNode.parentNode.parentNode.parentNode.id
             );
             index.controls.control.forEach((element) => {
-              element.is_requried = false;
+              element.isRequired = false;
             });
             break;
           }
@@ -286,12 +291,12 @@ const RequiredChanged = (e, control) => {
         for (const item of textArea) {
           item.required = false;
           let index = builder.find(
-            (card) =>
-              card.card_id ===
-              e.target.parentNode.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId ===
+                  e.target.parentNode.parentNode.parentNode.parentNode.id
           );
           index.controls.control.forEach((element) => {
-            element.is_requried = false;
+            element.isRequired = false;
           });
         }
       }
@@ -309,15 +314,16 @@ const ElementHeaderInput = (e) => {
   var newOption = document.createTextNode(e.target.value);
 
   label.appendChild(newOption);
-  label.addEventListener("click", editOnLableClick);
+  label.addEventListener("click", editOnLabelClick);
   parent.replaceChild(label, replaceInputToLabel);
 };
 
 const selectItemChanged = (e, bodyWrapperId, element) => {
+  let i;
   if (e.target.value !== "select") {
     if (e.target.value === "Input") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -337,11 +343,11 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           }
 
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          item.controls = { control: [] };
-          document.getElementById(item.control_require_id).disabled = false;
+          item.controls = {control: []};
+          document.getElementById(item.controlRequireId).disabled = false;
         }
         let inputParentDiv = document.createElement("div");
         inputParentDiv.setAttribute("class", "d-flex justify-content-between");
@@ -351,8 +357,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         inputDiv.setAttribute("class", "input-group input-group-outline");
 
         inputDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_divInput"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_divInput"
         );
 
         inputParentDiv.appendChild(inputDiv);
@@ -360,15 +366,15 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         bodyWrapper.appendChild(inputParentDiv);
 
         let getInputDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id + "_divInput"
+            e.target.parentNode.parentNode.parentNode.id + "_divInput"
         );
         let inputControl = document.createElement("input");
         inputControl.id = getInputDiv.id + "Input_" + 1;
         inputControl.type = "text";
 
         inputControl.setAttribute(
-          "placeholder",
-          "Please enter your answere here..."
+            "placeholder",
+            "Please enter your answer here..."
         );
         inputControl.setAttribute("class", "user-input");
 
@@ -378,7 +384,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         inputTypes.id = inputControl.id + "_Input_Types_" + 1;
 
-        for (var i = 0; i < inputTypesList.length; i++) {
+        for (i = 0; i < inputTypesList.length; i++) {
           let option = document.createElement("option");
           option.value = inputTypesList[i];
           option.text = inputTypesList[i];
@@ -392,25 +398,26 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         });
 
         let card = builder.find(
-          (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
         );
-        card.control_type = "Input";
+        card.controlType = "Input";
         card.hasControls = true;
 
-        let controls = { control: [] };
-        let control = new Object();
-        control.input_div_id =
-          e.target.parentNode.parentNode.parentNode.id + "_divInput";
-        control.inputControl_id = inputControl.id;
-        control.inputControl_type = inputControl.type;
+        let controls = {control: []};
+        let control = {};
+        control.inputDivId =
+            e.target.parentNode.parentNode.parentNode.id + "_divInput";
+        control.inputControlId = inputControl.id;
+        control.inputControlType = inputControl.type;
         control.placeholder = inputControl.placeholder;
-        control.input_select_id = inputTypes.id;
+        control.inputSelectId = inputTypes.id;
+        control.dbId = inputControl.dbId;
 
         controls.control.push(control);
 
         let index = builder.find(
-          (card) =>
-            card.card_id === e.target.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
       } else if (element != null) {
@@ -425,22 +432,22 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         inputDiv.setAttribute("class", "input-group input-group-outline");
 
-        inputDiv.setAttribute("id", element.controls.control[0].input_div_id);
+        inputDiv.setAttribute("id", element.controls.control[0].inputDivId);
 
         inputParentDiv.appendChild(inputDiv);
 
         bodyWrapper.appendChild(inputParentDiv);
 
         let getInputDiv = document.getElementById(
-          element.controls.control[0].input_div_id
+            element.controls.control[0].inputDivId
         );
         let inputControl = document.createElement("input");
-        inputControl.id = element.controls.control[0].inputControl_id;
-        inputControl.type = element.controls.control[0].inputControl_type;
+        inputControl.id = element.controls.control[0].inputControlId;
+        inputControl.type = element.controls.control[0].inputControlType;
 
         inputControl.setAttribute(
-          "placeholder",
-          element.controls.control[0].placeholder
+            "placeholder",
+            element.controls.control[0].placeholder
         );
         inputControl.setAttribute("class", "user-input");
 
@@ -448,13 +455,13 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let inputTypes = document.createElement("select");
 
-        inputTypes.id = element.controls.control[0].input_select_id;
+        inputTypes.id = element.controls.control[0].inputSelectId;
 
-        for (var i = 0; i < inputTypesList.length; i++) {
+        for (i = 0; i < inputTypesList.length; i++) {
           let option = document.createElement("option");
           option.value = inputTypesList[i];
           option.text = inputTypesList[i];
-          if (element.controls.control[0].inputControl_type === option.value) {
+          if (element.controls.control[0].inputControlType === option.value) {
             option.selected = true;
           }
           inputTypes.appendChild(option);
@@ -466,9 +473,9 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           onInputTypeChange(e, inputControl);
         });
       }
-    } else if (e.target.value === "Multiline Text") {
+    } else if (e.target.value === "MultilineText") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -487,12 +494,12 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           }
 
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          document.getElementById(item.control_require_id).disabled = false;
+          document.getElementById(item.controlRequireId).disabled = false;
           if (item.controls !== undefined) {
-            item.controls = { control: [] };
+            item.controls = {control: []};
           }
         }
         let inputParentDiv = document.createElement("div");
@@ -502,8 +509,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         textAreaDiv.setAttribute("class", "input-group input-group-outline");
         textAreaDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput"
         );
 
         inputParentDiv.appendChild(textAreaDiv);
@@ -511,35 +518,35 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         bodyWrapper.appendChild(inputParentDiv);
 
         let getMultiLineInputDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput"
+            e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput"
         );
         let textAreaControl = document.createElement("textarea");
         textAreaControl.id = getMultiLineInputDiv.id + "textarea_" + 1;
         textAreaControl.setAttribute("class", "user-textarea");
         textAreaControl.setAttribute(
-          "placeholder",
-          "Please enter brief answer..."
+            "placeholder",
+            "Please enter brief answer..."
         );
         getMultiLineInputDiv.appendChild(textAreaControl);
 
         let card = builder.find(
-          (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
         );
-        card.control_type = "Multiline Text";
+        card.controlType = "MultilineText";
         card.hasControls = true;
 
-        let controls = { control: [] };
-        let control = new Object();
-        control.input_div_id =
-          e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput";
-        control.inputControl_id = textAreaControl.id;
-        control.inputControl_type = textAreaControl.type;
+        let controls = {control: []};
+        let control = {};
+        control.inputDivId =
+            e.target.parentNode.parentNode.parentNode.id + "_divMultilineInput";
+        control.inputControlId = textAreaControl.id;
+        control.inputControlType = textAreaControl.type;
         control.placeholder = textAreaControl.placeholder;
         controls.control.push(control);
 
         let index = builder.find(
-          (card) =>
-            card.card_id === e.target.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
       } else if (element != null) {
@@ -553,8 +560,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         textAreaDiv.setAttribute("class", "input-group input-group-outline");
         textAreaDiv.setAttribute(
-          "id",
-          element.controls.control[0].input_div_id
+            "id",
+            element.controls.control[0].inputDivId
         );
 
         inputParentDiv.appendChild(textAreaDiv);
@@ -562,20 +569,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         bodyWrapper.appendChild(inputParentDiv);
 
         let getMultiLineInputDiv = document.getElementById(
-          element.controls.control[0].input_div_id
+            element.controls.control[0].inputDivId
         );
         let textAreaControl = document.createElement("textarea");
-        textAreaControl.id = element.controls.control[0].inputControl_id;
+        textAreaControl.id = element.controls.control[0].inputControlId;
         textAreaControl.setAttribute("class", "user-textarea");
         textAreaControl.setAttribute(
-          "placeholder",
-          element.controls.control[0].placeholder
+            "placeholder",
+            element.controls.control[0].placeholder
         );
         getMultiLineInputDiv.appendChild(textAreaControl);
       }
     } else if (e.target.value === "Radio") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType !== e.target.value) {
           element = null;
         }
       }
@@ -594,18 +601,18 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           }
 
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          item.controls = { control: [] };
-          document.getElementById(item.control_require_id).disabled = false;
+          item.controls = {control: []};
+          document.getElementById(item.controlRequireId).disabled = false;
         }
 
         let hiddenIndexLabel = document.createElement("input");
 
         hiddenIndexLabel.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
         );
         bodyWrapper.appendChild(hiddenIndexLabel);
         hiddenIndexLabel.setAttribute("type", "hidden");
@@ -614,29 +621,32 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let radioParentDiv = document.createElement("div");
 
           radioParentDiv.setAttribute(
-            "class",
-            "d-flex justify-content-between py-2"
+              "class",
+              "d-flex justify-content-between py-2"
           );
 
           let radioDiv = document.createElement("div");
 
           radioDiv.setAttribute("class", "d-flex align-item-center w-100");
           radioDiv.setAttribute(
-            "id",
-            e.target.parentNode.parentNode.parentNode.id + "_divRadio_" + index
+              "id",
+              e.target.parentNode.parentNode.parentNode.id + "_divRadio_" + index
           );
+          radioDiv.setAttribute("dbId", crypto.randomUUID());
 
           radioParentDiv.appendChild(radioDiv);
 
           bodyWrapper.appendChild(radioParentDiv);
 
           let getDiv = document.getElementById(
-            e.target.parentNode.parentNode.parentNode.id + "_divRadio_" + index
+              e.target.parentNode.parentNode.parentNode.id + "_divRadio_" + index
           );
           let input = document.createElement("input");
           input.type = "Radio";
           input.name = bodyWrapper.id;
           input.id = getDiv.id + "_radio_" + index;
+          let dbId = crypto.randomUUID()
+          input.setAttribute("dbId", dbId)
           let label = document.createElement("label");
           label.id = getDiv.id + "Option_" + index;
 
@@ -645,8 +655,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let removeButton = document.createElement("button");
 
           removeButton.setAttribute(
-            "id",
-            e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
+              "id",
+              e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
           );
           removeButton.innerHTML = "x";
           removeButton.setAttribute("class", "btn-remove");
@@ -667,33 +677,34 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             hiddenIndexLabel.value = index + 1;
 
             let card = builder.find(
-              (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+                (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
             );
-            card.control_type = "Radio";
+            card.controlType = "Radio";
             card.hasControls = true;
             card.hiddenIndex = hiddenIndexLabel.value;
-            let controls = { control: [] };
+            let controls = {control: []};
 
-            let control = new Object();
-            control.select_div_id =
-              e.target.parentNode.parentNode.parentNode.id +
-              "_divRadio_" +
-              index;
-            control.select_control_id = input.id;
-            control.select_control_type = input.type;
+            let control = {};
+            control.selectDivId =
+                e.target.parentNode.parentNode.parentNode.id +
+                "_divRadio_" +
+                index;
+            control.selectControlId = input.id;
+            control.selectControlType = input.type;
             control.placeholder = input.placeholder;
             control.lastIndex = hiddenIndexLabel.value;
 
             control.text = label.innerHTML;
 
-            control.label_id = label.id;
+            control.labelId = label.id;
             control.label_type = label.tagName;
+            control.dbId = dbId;
 
             controls.control.push(control);
 
             let item = builder.find(
-              (card) =>
-                card.card_id === e.target.parentNode.parentNode.parentNode.id
+                (card) =>
+                    card.cardId === e.target.parentNode.parentNode.parentNode.id
             );
 
             if (item.controls === undefined) {
@@ -711,12 +722,12 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             getDiv.appendChild(link);
             link.addEventListener("click", (e) => {
               AddNewOption(
-                e,
-                "Radio",
-                getDiv,
-                radioDiv,
-                index,
-                hiddenIndexLabel
+                  e,
+                  "Radio",
+                  getDiv,
+                  radioDiv,
+                  index,
+                  hiddenIndexLabel
               );
             });
           }
@@ -728,8 +739,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         let hiddenIndexLabel = document.createElement("input");
 
         hiddenIndexLabel.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
         );
         bodyWrapper.appendChild(hiddenIndexLabel);
         hiddenIndexLabel.setAttribute("type", "hidden");
@@ -738,8 +749,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let radioParentDiv = document.createElement("div");
 
           radioParentDiv.setAttribute(
-            "class",
-            "d-flex justify-content-between py-2"
+              "class",
+              "d-flex justify-content-between py-2"
           );
 
           let radioDiv = document.createElement("div");
@@ -748,13 +759,13 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
           if (index < element.controls.control.length) {
             radioDiv.setAttribute(
-              "id",
-              element.controls.control[index].select_div_id
+                "id",
+                element.controls.control[index].selectDivId
             );
           } else {
             radioDiv.setAttribute(
-              "id",
-              e.target.parentNode.parentNode.parentNode.id +
+                "id",
+                e.target.parentNode.parentNode.parentNode.id +
                 "_divRadio_NewOption_" +
                 index
             );
@@ -766,11 +777,11 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let getDiv;
           if (index < element.controls.control.length) {
             getDiv = document.getElementById(
-              element.controls.control[index].select_div_id
+                element.controls.control[index].selectDivId
             );
           } else {
             getDiv = document.getElementById(
-              e.target.parentNode.parentNode.parentNode.id +
+                e.target.parentNode.parentNode.parentNode.id +
                 "_divRadio_NewOption_" +
                 index
             );
@@ -780,20 +791,29 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             let input = document.createElement("input");
             input.type = "Radio";
             input.name = bodyWrapper.id;
-            input.id = element.controls.control[index].select_control_id;
+            input.id = element.controls.control[index].selectControlId;
+            let dbId;
+            if (element.controls.control[index].dbId) {
+              dbId = element.controls.control[index].dbId;
+            } else {
+              dbId = crypto.randomUUID();
+              element.controls.control[index].dbId = dbId
+            }
+            input.setAttribute("dbId", dbId)
+            input.dbId = dbId
             let label = document.createElement("label");
-            label.id = element.controls.control[index].label_id;
+            label.id = element.controls.control[index].labelId;
 
             let removeButton = document.createElement("button");
 
             removeButton.setAttribute(
-              "id",
-              e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
+                "id",
+                e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
             );
             removeButton.innerHTML = "x";
             removeButton.setAttribute("class", "btn-remove");
             let textYes = document.createTextNode(
-              element.controls.control[index].text
+                element.controls.control[index].text
             );
             label.appendChild(textYes);
             getDiv.appendChild(input);
@@ -815,12 +835,12 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             getDiv.appendChild(link);
             link.addEventListener("click", (e) => {
               AddNewOption(
-                e,
-                "Radio",
-                getDiv,
-                radioDiv,
-                index,
-                hiddenIndexLabel
+                  e,
+                  "Radio",
+                  getDiv,
+                  radioDiv,
+                  index,
+                  hiddenIndexLabel
               );
             });
           }
@@ -828,7 +848,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       }
     } else if (e.target.value === "Checkbox") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType != e.target.value) {
           element = null;
         }
       }
@@ -847,18 +867,18 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           }
 
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          item.controls = { control: [] };
-          document.getElementById(item.control_require_id).disabled = false;
+          item.controls = {control: []};
+          document.getElementById(item.controlRequireId).disabled = false;
         }
 
         let hiddenIndexLabel = document.createElement("input");
 
         hiddenIndexLabel.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
         );
         bodyWrapper.appendChild(hiddenIndexLabel);
         hiddenIndexLabel.setAttribute("type", "hidden");
@@ -867,16 +887,17 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let checkboxParentDiv = document.createElement("div");
 
           checkboxParentDiv.setAttribute(
-            "class",
-            "d-flex justify-content-between py-2"
+              "class",
+              "d-flex justify-content-between py-2"
           );
 
           let checkboxDiv = document.createElement("div");
+          checkboxDiv.setAttribute("dbId", crypto.randomUUID());
 
           checkboxDiv.setAttribute("class", "d-flex align-item-center w-100");
           checkboxDiv.setAttribute(
-            "id",
-            e.target.parentNode.parentNode.parentNode.id +
+              "id",
+              e.target.parentNode.parentNode.parentNode.id +
               "_divCheckbox_" +
               index
           );
@@ -886,7 +907,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           bodyWrapper.appendChild(checkboxParentDiv);
 
           let getCheckboxDiv = document.getElementById(
-            e.target.parentNode.parentNode.parentNode.id +
+              e.target.parentNode.parentNode.parentNode.id +
               "_divCheckbox_" +
               index
           );
@@ -894,6 +915,9 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           input.type = "checkbox";
           input.name = bodyWrapper.id;
           input.id = getCheckboxDiv.id + "_checkbox_" + index;
+          let dbId = crypto.randomUUID()
+          input.setAttribute("dbId", dbId)
+          input.db = dbId
           let label = document.createElement("label");
           label.id = getCheckboxDiv.id + "_checkboxOption_" + index;
 
@@ -902,8 +926,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let removeButton = document.createElement("button");
 
           removeButton.setAttribute(
-            "id",
-            e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
+              "id",
+              e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
           );
           removeButton.innerHTML = "x";
           removeButton.setAttribute("class", "btn-remove");
@@ -924,33 +948,34 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             hiddenIndexLabel.value = index + 1;
 
             let card = builder.find(
-              (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+                (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
             );
-            card.control_type = "Checkbox";
+            card.controlType = "Checkbox";
             card.hasControls = true;
             card.hiddenIndex = hiddenIndexLabel.value;
 
-            let controls = { control: [] };
+            let controls = {control: []};
 
-            let control = new Object();
-            control.select_div_id =
-              e.target.parentNode.parentNode.parentNode.id +
-              "_divCheckbox_" +
-              index;
-            control.select_control_id = input.id;
-            control.select_control_type = input.type;
+            let control = {};
+            control.selectDivId =
+                e.target.parentNode.parentNode.parentNode.id +
+                "_divCheckbox_" +
+                index;
+            control.selectControlId = input.id;
+            control.selectControlType = input.type;
             control.placeholder = input.placeholder;
+            control.dbId = dbId
 
             control.text = label.innerHTML;
 
-            control.label_id = label.id;
+            control.labelId = label.id;
             control.label_type = label.tagName;
 
             controls.control.push(control);
 
             let item = builder.find(
-              (card) =>
-                card.card_id === e.target.parentNode.parentNode.parentNode.id
+                (card) =>
+                    card.cardId === e.target.parentNode.parentNode.parentNode.id
             );
 
             if (item.controls === undefined) {
@@ -968,12 +993,12 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             getCheckboxDiv.appendChild(link);
             link.addEventListener("click", (e) => {
               AddNewOption(
-                e,
-                "Checkbox",
-                getCheckboxDiv,
-                checkboxDiv,
-                index,
-                hiddenIndexLabel
+                  e,
+                  "Checkbox",
+                  getCheckboxDiv,
+                  checkboxDiv,
+                  index,
+                  hiddenIndexLabel
               );
             });
           }
@@ -985,8 +1010,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         let hiddenIndexLabel = document.createElement("input");
 
         hiddenIndexLabel.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_hiddenIndexLabel"
         );
         bodyWrapper.appendChild(hiddenIndexLabel);
         hiddenIndexLabel.setAttribute("type", "hidden");
@@ -995,8 +1020,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let checkboxParentDiv = document.createElement("div");
 
           checkboxParentDiv.setAttribute(
-            "class",
-            "d-flex justify-content-between py-2"
+              "class",
+              "d-flex justify-content-between py-2"
           );
 
           let checkboxDiv = document.createElement("div");
@@ -1005,13 +1030,13 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
           if (index < element.controls.control.length) {
             checkboxDiv.setAttribute(
-              "id",
-              element.controls.control[index].select_div_id
+                "id",
+                element.controls.control[index].selectDivId
             );
           } else {
             checkboxDiv.setAttribute(
-              "id",
-              e.target.parentNode.parentNode.parentNode.id +
+                "id",
+                e.target.parentNode.parentNode.parentNode.id +
                 "_divCheckbox_NewOption_" +
                 index
             );
@@ -1025,11 +1050,11 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
           if (index < element.controls.control.length) {
             getCheckboxDiv = document.getElementById(
-              element.controls.control[index].select_div_id
+                element.controls.control[index].selectDivId
             );
           } else {
             getCheckboxDiv = document.getElementById(
-              e.target.parentNode.parentNode.parentNode.id +
+                e.target.parentNode.parentNode.parentNode.id +
                 "_divCheckbox_NewOption_" +
                 index
             );
@@ -1039,19 +1064,28 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             let input = document.createElement("input");
             input.type = "checkbox";
             input.name = bodyWrapper.id;
-            input.id = element.controls.control[index].select_control_id;
+            input.id = element.controls.control[index].selectControlId;
             let label = document.createElement("label");
-            label.id = element.controls.control[index].label_id;
+            label.id = element.controls.control[index].labelId;
+            let dbId;
+            if (element.controls.control[index].dbId) {
+              dbId = element.controls.control[index].dbId;
+            } else {
+              dbId = crypto.randomUUID();
+              element.controls.control[index].dbId = dbId
+            }
+            input.setAttribute("dbId", dbId)
+            input.dbId = dbId
 
             let textYes = document.createTextNode(
-              element.controls.control[index].text
+                element.controls.control[index].text
             );
 
             let removeButton = document.createElement("button");
 
             removeButton.setAttribute(
-              "id",
-              e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
+                "id",
+                e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
             );
             removeButton.innerHTML = "x";
             removeButton.setAttribute("class", "btn-remove");
@@ -1077,20 +1111,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             getCheckboxDiv.appendChild(link);
             link.addEventListener("click", (e) => {
               AddNewOption(
-                e,
-                "Checkbox",
-                getCheckboxDiv,
-                checkboxDiv,
-                index,
-                hiddenIndexLabel
+                  e,
+                  "Checkbox",
+                  getCheckboxDiv,
+                  checkboxDiv,
+                  index,
+                  hiddenIndexLabel
               );
             });
           }
         }
       }
-    } else if (e.target.value === "Single Select") {
+    } else if (e.target.value === "SingleSelect") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType != e.target.value) {
           element = null;
         }
       }
@@ -1109,11 +1143,11 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           }
 
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          document.getElementById(item.control_require_id).disabled = false;
-          item.controls = { control: [] };
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
         }
 
         let selectParentDiv = document.createElement("div");
@@ -1123,8 +1157,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         selectDiv.setAttribute("class", "input-group input-group-outline");
         selectDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_divSelect"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_divSelect"
         );
 
         selectParentDiv.appendChild(selectDiv);
@@ -1133,85 +1167,71 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let selectInputParentDiv = document.createElement("div");
         selectInputParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between my-4"
+            "class",
+            "d-flex justify-content-between my-4"
         );
 
         let inputDiv = document.createElement("div");
         inputDiv.setAttribute("class", "input-group input-group-outline");
         inputDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_divInputSelect"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_divInputSelect"
         );
         selectInputParentDiv.appendChild(inputDiv);
         bodyWrapper.appendChild(selectInputParentDiv);
 
         let getInputSelectDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id + "_divInputSelect"
+            e.target.parentNode.parentNode.parentNode.id + "_divInputSelect"
         );
         let inputControl = document.createElement("input");
         inputControl.id = getInputSelectDiv.id + "_selectInput_" + 1;
         inputControl.setAttribute("class", "user-input");
         inputControl.setAttribute(
-          "placeholder",
-          "Please enter options and press Enter..."
+            "placeholder",
+            "Please enter options and press Enter..."
         );
         getInputSelectDiv.appendChild(inputControl);
 
         let getSelectDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id + "_divSelect"
+            e.target.parentNode.parentNode.parentNode.id + "_divSelect"
         );
 
         let selectControl = document.createElement("select");
         selectControl.id = getSelectDiv.id + "_select_" + 1;
         selectControl.setAttribute("class", "user-input");
         selectControl.setAttribute(
-          "placeholder",
-          "Please enter your answere here..."
+            "placeholder",
+            "Please enter your answere here..."
         );
         getSelectDiv.appendChild(selectControl);
-
-        // let option = document.createElement("option");
-        // option.value = "Choose one option";
-        // option.text = "Choose one option";
-        // option.disabled = true;
-        // option.selected = true;
-        // selectControl.appendChild(option);
 
         inputControl.addEventListener("keypress", (e) => {
           enterItemToDropDownList(e, selectControl);
         });
 
         let card = builder.find(
-          (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
         );
-        card.control_type = "Single Select";
+        card.controlType = "SingleSelect";
         card.hasControls = true;
 
-        let controls = { control: [] };
+        let controls = {control: []};
 
-        let control = new Object();
+        let control = {};
         control.select_div = selectDiv.id;
         control.select_input_div = inputDiv.id;
         control.select_inputcontrol_div = inputControl.id;
-        control.select_control_id = selectControl.id;
-        control.select_control_type = selectControl.type;
+        control.selectControlId = selectControl.id;
+        control.selectControlType = selectControl.type;
         control.placeholder = inputControl.placeholder;
 
-        // let options = new Object();
-        // options.option_text = option.text;
-        // options.option_value = option.value;
-        // options.option_disabled = option.disabled;
-        // options.option_selected = option.selected;
+        control.options = {option: []};
 
-        control.options = { option: [] };
-
-        // control.options.option.push(options);
         controls.control.push(control);
 
         let index = builder.find(
-          (card) =>
-            card.card_id === e.target.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
       } else if (element !== null) {
@@ -1229,41 +1249,41 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let selectInputParentDiv = document.createElement("div");
         selectInputParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between my-4"
+            "class",
+            "d-flex justify-content-between my-4"
         );
 
         let inputDiv = document.createElement("div");
         inputDiv.setAttribute("class", "input-group input-group-outline");
         inputDiv.setAttribute(
-          "id",
-          element.controls.control[0].select_input_div
+            "id",
+            element.controls.control[0].select_input_div
         );
         selectInputParentDiv.appendChild(inputDiv);
         bodyWrapper.appendChild(selectInputParentDiv);
 
         let getInputSelectDiv = document.getElementById(
-          element.controls.control[0].select_input_div
+            element.controls.control[0].select_input_div
         );
         let inputControl = document.createElement("input");
         inputControl.id = element.controls.control[0].select_inputcontrol_div;
         inputControl.setAttribute("class", "user-input");
         inputControl.setAttribute(
-          "placeholder",
-          element.controls.control[0].placeholder
+            "placeholder",
+            element.controls.control[0].placeholder
         );
         getInputSelectDiv.appendChild(inputControl);
 
         let getSelectDiv = document.getElementById(
-          element.controls.control[0].select_div
+            element.controls.control[0].select_div
         );
 
         let selectControl = document.createElement("select");
-        selectControl.id = element.controls.control[0].select_control_id;
+        selectControl.id = element.controls.control[0].selectControlId;
         selectControl.setAttribute("class", "user-input");
         selectControl.setAttribute(
-          "placeholder",
-          "Please enter your answere here..."
+            "placeholder",
+            "Please enter your answere here..."
         );
         getSelectDiv.appendChild(selectControl);
 
@@ -1273,6 +1293,15 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           option.text = item.option_text;
           option.disabled = item.option_disabled;
           option.selected = item.option_selected;
+          let dbId;
+          if (item.dbId) {
+            dbId = item.dbId;
+          } else {
+            dbId = crypto.randomUUID();
+            option.dbId = dbId;
+            item.dbId = dbId
+          }
+          option.setAttribute("dbId", dbId);
 
           selectControl.appendChild(option);
         });
@@ -1281,9 +1310,87 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           enterItemToDropDownList(e, selectControl);
         });
       }
+    } else if (e.target.value === "Signature") {
+      if (element !== null) {
+        if (element.controlType != e.target.value) {
+          element = null;
+        }
+      }
+
+      let bodyWrapper = document.getElementById(bodyWrapperId);
+      if (element === null) {
+        if (bodyWrapper != null) {
+          bodyWrapper.innerHTML = "";
+
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
+          let item = builder.find(
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
+          );
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
+        }
+
+        let descriptionDiv = document.createElement("p");
+        descriptionDiv.innerText = "A signature will be collected"
+        bodyWrapper.appendChild(descriptionDiv)
+
+
+        let card = builder.find(
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
+        );
+        card.controlType = "Signature";
+
+      }
+    } else if (e.target.value === "Pathways") {
+      if (element !== null) {
+        if (element.controlType != e.target.value) {
+          element = null;
+        }
+      }
+
+      let bodyWrapper = document.getElementById(bodyWrapperId);
+      if (element === null) {
+        if (bodyWrapper != null) {
+          bodyWrapper.innerHTML = "";
+
+          if (e.target.className === "select-control validation") {
+            e.target.setAttribute("class", "select-control");
+          }
+
+          if (bodyWrapper.className === "validation-wrapper") {
+            bodyWrapper.setAttribute("class", "body-wrapper");
+          }
+
+          let item = builder.find(
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
+          );
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
+        }
+
+        let descriptionDiv = document.createElement("p");
+        descriptionDiv.innerText = "Students will be able to select a single pathway."
+        bodyWrapper.appendChild(descriptionDiv)
+
+
+        let card = builder.find(
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
+        );
+        card.controlType = "Pathways";
+
+      }
     } else if (e.target.value === "Date") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType != e.target.value) {
           element = null;
         }
       }
@@ -1299,11 +1406,11 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             bodyWrapper.setAttribute("class", "body-wrapper");
           }
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          document.getElementById(item.control_require_id).disabled = false;
-          item.controls = { control: [] };
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
         }
         let dateParentDiv = document.createElement("div");
         dateParentDiv.setAttribute("class", "d-flex justify-content-between");
@@ -1312,8 +1419,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         dateDiv.setAttribute("class", "input-group input-group-outline");
         dateDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
         );
 
         dateParentDiv.appendChild(dateDiv);
@@ -1321,36 +1428,36 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         bodyWrapper.appendChild(dateParentDiv);
 
         let getDateDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
+            e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
         );
         let inputDateControl = document.createElement("input");
         inputDateControl.id = getDateDiv.id + "dateInput_" + 1;
         inputDateControl.type = "date";
         inputDateControl.setAttribute("class", "user-input");
         inputDateControl.setAttribute(
-          "placeholder",
-          "Please enter your answere here..."
+            "placeholder",
+            "Please enter your answere here..."
         );
         getDateDiv.appendChild(inputDateControl);
 
         let card = builder.find(
-          (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
         );
-        card.control_type = "Date";
+        card.controlType = "Date";
         card.hasControls = true;
 
-        let controls = { control: [] };
-        let control = new Object();
-        control.input_div_id =
-          e.target.parentNode.parentNode.parentNode.id + "_divDateTime";
-        control.inputControl_id = inputDateControl.id;
-        control.inputControl_type = inputDateControl.type;
+        let controls = {control: []};
+        let control = {};
+        control.inputDivId =
+            e.target.parentNode.parentNode.parentNode.id + "_divDateTime";
+        control.inputControlId = inputDateControl.id;
+        control.inputControlType = inputDateControl.type;
         control.placeholder = inputDateControl.placeholder;
         controls.control.push(control);
 
         let index = builder.find(
-          (card) =>
-            card.card_id === e.target.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
       } else if (element !== null) {
@@ -1363,22 +1470,22 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         let dateDiv = document.createElement("div");
 
         dateDiv.setAttribute("class", "input-group input-group-outline");
-        dateDiv.setAttribute("id", element.controls.control[0].input_div_id);
+        dateDiv.setAttribute("id", element.controls.control[0].inputDivId);
 
         dateParentDiv.appendChild(dateDiv);
 
         bodyWrapper.appendChild(dateParentDiv);
 
         let getDateDiv = document.getElementById(
-          element.controls.control[0].input_div_id
+            element.controls.control[0].inputDivId
         );
         let inputDateControl = document.createElement("input");
-        inputDateControl.id = element.controls.control[0].inputControl_id;
-        inputDateControl.type = element.controls.control[0].inputControl_type;
+        inputDateControl.id = element.controls.control[0].inputControlId;
+        inputDateControl.type = element.controls.control[0].inputControlType;
         inputDateControl.setAttribute("class", "user-input");
         inputDateControl.setAttribute(
-          "placeholder",
-          element.controls.control[0].placeholder
+            "placeholder",
+            element.controls.control[0].placeholder
         );
         getDateDiv.appendChild(inputDateControl);
       }
@@ -1394,8 +1501,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
       timeDiv.setAttribute("class", "input-group input-group-outline");
       timeDiv.setAttribute(
-        "id",
-        e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
+          "id",
+          e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
       );
 
       timeParentDiv.appendChild(timeDiv);
@@ -1403,20 +1510,20 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
       bodyWrapper.appendChild(timeParentDiv);
 
       let getTimeDiv = document.getElementById(
-        e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
+          e.target.parentNode.parentNode.parentNode.id + "_divDateTime"
       );
       let inputTimeControl = document.createElement("input");
       inputTimeControl.id = getTimeDiv.id + "dateInput_" + 1;
       inputTimeControl.type = "time";
       inputTimeControl.setAttribute("class", "user-input");
       inputTimeControl.setAttribute(
-        "placeholder",
-        "Please enter your answere here..."
+          "placeholder",
+          "Please enter your answere here..."
       );
       getTimeDiv.appendChild(inputTimeControl);
-    } else if (e.target.value === "Yes/No") {
+    } else if (e.target.value === "YesNo") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType != e.target.value) {
           element = null;
         }
       }
@@ -1432,27 +1539,27 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             bodyWrapper.setAttribute("class", "body-wrapper");
           }
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          document.getElementById(item.control_require_id).disabled = false;
-          item.controls = { control: [] };
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
         }
 
         for (let index = 0; index < listOptionsYesNo.length; index++) {
           let radioYesNoParentDiv = document.createElement("div");
 
           radioYesNoParentDiv.setAttribute(
-            "class",
-            "d-flex justify-content-between py-2"
+              "class",
+              "d-flex justify-content-between py-2"
           );
 
           let radioYesNoDiv = document.createElement("div");
 
           radioYesNoDiv.setAttribute("class", "d-flex align-item-center w-100");
           radioYesNoDiv.setAttribute(
-            "id",
-            e.target.parentNode.parentNode.parentNode.id +
+              "id",
+              e.target.parentNode.parentNode.parentNode.id +
               "_divRadioYesNo_" +
               index
           );
@@ -1462,7 +1569,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           bodyWrapper.appendChild(radioYesNoParentDiv);
 
           let getRadioYesNoDiv = document.getElementById(
-            e.target.parentNode.parentNode.parentNode.id +
+              e.target.parentNode.parentNode.parentNode.id +
               "_divRadioYesNo_" +
               index
           );
@@ -1472,6 +1579,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           input.id = getRadioYesNoDiv.id + "_radio_" + index;
           let label = document.createElement("label");
           label.id = getRadioYesNoDiv.id + "Option_" + index;
+          let dbId = crypto.randomUUID()
+          input.setAttribute("dbId", dbId)
 
           let textYes = document.createTextNode(listOptionsYesNo[index]);
 
@@ -1481,30 +1590,31 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           label.setAttribute("class", "radio-label-YesNo");
 
           let card = builder.find(
-            (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+              (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          card.control_type = "Yes/No";
+          card.controlType = "YesNo";
           card.hasControls = true;
 
-          let controls = { control: [] };
+          let controls = {control: []};
 
-          let control = new Object();
-          control.select_div_id = radioYesNoDiv.id;
-          control.select_control_id = input.id;
-          control.select_control_type = input.type;
-          control.select_label_id = label.id;
+          let control = {};
+          control.selectDivId = radioYesNoDiv.id;
+          control.selectControlId = input.id;
+          control.selectControlType = input.type;
+          control.select_labelId = label.id;
           control.placeholder = input.placeholder;
+          control.dbId = dbId
 
           control.text = label.innerHTML;
 
-          control.label_id = label.id;
+          control.labelId = label.id;
           control.label_type = label.tagName;
 
           controls.control.push(control);
 
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
 
           if (item.controls === undefined) {
@@ -1523,16 +1633,16 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           let radioYesNoParentDiv = document.createElement("div");
 
           radioYesNoParentDiv.setAttribute(
-            "class",
-            "d-flex justify-content-between py-2"
+              "class",
+              "d-flex justify-content-between py-2"
           );
 
           let radioYesNoDiv = document.createElement("div");
 
           radioYesNoDiv.setAttribute("class", "d-flex align-item-center w-100");
           radioYesNoDiv.setAttribute(
-            "id",
-            element.controls.control[index].select_div_id
+              "id",
+              element.controls.control[index].selectDivId
           );
 
           radioYesNoParentDiv.appendChild(radioYesNoDiv);
@@ -1540,17 +1650,25 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           bodyWrapper.appendChild(radioYesNoParentDiv);
 
           let getRadioYesNoDiv = document.getElementById(
-            element.controls.control[index].select_div_id
+              element.controls.control[index].selectDivId
           );
           let input = document.createElement("input");
           input.type = "Radio";
           input.name = bodyWrapper.id;
-          input.id = element.controls.control[index].select_control_id;
+          input.id = element.controls.control[index].selectControlId;
           let label = document.createElement("label");
-          label.id = element.controls.control[index].select_label_id;
+          label.id = element.controls.control[index].select_labelId;
+          let dbId;
+          if (element.controls.control[index].dbId) {
+            dbId = element.controls.control[index].dbId;
+          } else {
+            dbId = crypto.randomUUID();
+            element.controls.control[index].dbId = dbId
+          }
+          input.setAttribute("dbId", dbId)
 
           let textYes = document.createTextNode(
-            element.controls.control[index].text
+              element.controls.control[index].text
           );
 
           label.appendChild(textYes);
@@ -1559,9 +1677,9 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           label.setAttribute("class", "radio-label-YesNo");
         }
       }
-    } else if (e.target.value === "I Understand") {
+    } else if (e.target.value === "IUnderstand") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType != e.target.value) {
           element = null;
         }
       }
@@ -1578,26 +1696,26 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             bodyWrapper.setAttribute("class", "body-wrapper");
           }
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          document.getElementById(item.control_require_id).disabled = false;
-          item.controls = { control: [] };
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
         }
 
         let chkConsentParentDiv = document.createElement("div");
 
         chkConsentParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between py-2"
+            "class",
+            "d-flex justify-content-between py-2"
         );
 
         let chkConsentDiv = document.createElement("div");
 
         chkConsentDiv.setAttribute("class", "d-flex align-item-center w-100");
         chkConsentDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id +
+            "id",
+            e.target.parentNode.parentNode.parentNode.id +
             "_divCheckbox_Iunderstand"
         );
 
@@ -1606,7 +1724,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         bodyWrapper.appendChild(chkConsentParentDiv);
 
         let getChkConsentDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id +
+            e.target.parentNode.parentNode.parentNode.id +
             "_divCheckbox_Iunderstand"
         );
         let input = document.createElement("input");
@@ -1615,42 +1733,45 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         input.id = getChkConsentDiv.id + "_checkbox_Iunderstand";
         let label = document.createElement("label");
         label.id = getChkConsentDiv.id + "_checkboxOption_Iunderstand";
+        let dbId = crypto.randomUUID()
+        input.dbId = dbId
+        input.disabled = true
+        input.setAttribute("dbId", dbId)
 
         let textYes = document.createTextNode(
-          "I understand and agree the terms and conditions"
+            "I understand"
         );
 
         label.appendChild(textYes);
         getChkConsentDiv.appendChild(input);
         getChkConsentDiv.appendChild(label);
         label.setAttribute("class", "radio-label");
-        label.addEventListener("click", (e) => {
-          editRadioOnClick(e, null);
-        });
 
         let card = builder.find(
-          (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
         );
-        card.control_type = "I Understand";
+        card.controlType = "IUnderstand";
         card.hasControls = true;
 
-        let controls = { control: [] };
-        let control = new Object();
-        control.select_div_id = chkConsentDiv.id;
-        control.inputControl_id = input.id;
-        control.inputControl_type = input.type;
+        let controls = {control: []};
+        let control = {};
+        control.selectDivId = chkConsentDiv.id;
+        control.inputControlId = input.id;
+        control.inputControlType = input.type;
         control.input_placeholder = input.placeholder;
+        control.dbId = dbId;
 
         control.label_i_understand = label.innerHTML;
         control.text = label.innerHTML;
 
-        control.label_id = label.id;
+        control.labelId = label.id;
+        control.dbId = crypto.randomUUID();
 
         controls.control.push(control);
 
         let index = builder.find(
-          (card) =>
-            card.card_id === e.target.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
       } else if (element !== null) {
@@ -1661,16 +1782,16 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         let chkConsentParentDiv = document.createElement("div");
 
         chkConsentParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between py-2"
+            "class",
+            "d-flex justify-content-between py-2"
         );
 
         let chkConsentDiv = document.createElement("div");
 
         chkConsentDiv.setAttribute("class", "d-flex align-item-center w-100");
         chkConsentDiv.setAttribute(
-          "id",
-          element.controls.control[0].select_div_id
+            "id",
+            element.controls.control[0].selectDivId
         );
 
         chkConsentParentDiv.appendChild(chkConsentDiv);
@@ -1678,28 +1799,36 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         bodyWrapper.appendChild(chkConsentParentDiv);
 
         let getChkConsentDiv = document.getElementById(
-          element.controls.control[0].select_div_id
+            element.controls.control[0].selectDivId
         );
         let input = document.createElement("input");
         input.type = "checkbox";
         input.name = bodyWrapper.id;
-        input.id = element.controls.control[0].inputControl_id;
+        input.id = element.controls.control[0].inputControlId;
+        input.disabled = true
+        let dbId;
+        if (element.controls.control[0].dbId) {
+          dbId = element.controls.control[0].dbId
+        } else {
+          dbId = crypto.randomUUID()
+          element.controls.control[0].dbId = dbId
+        }
+        input.dbId = dbId
+        input.setAttribute("dbId", dbId)
         let label = document.createElement("label");
-        label.id = element.controls.control[0].label_id;
+        label.id = element.controls.control[0].labelId;
+        label.disabled = true
 
         let textYes = document.createTextNode(element.controls.control[0].text);
 
         label.appendChild(textYes);
         getChkConsentDiv.appendChild(input);
         getChkConsentDiv.appendChild(label);
-        label.setAttribute("class", "radio-label");
-        label.addEventListener("click", (e) => {
-          editRadioOnClick(e, null);
-        });
+        label.setAttribute("class", "radio-label-label");
       }
-    } else if (e.target.value === "Multi Select") {
+    } else if (e.target.value === "MultiSelect") {
       if (element !== null) {
-        if (element.control_type != e.target.value) {
+        if (element.controlType != e.target.value) {
           element = null;
         }
       }
@@ -1716,24 +1845,24 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             bodyWrapper.setAttribute("class", "body-wrapper");
           }
           let item = builder.find(
-            (card) =>
-              card.card_id === e.target.parentNode.parentNode.parentNode.id
+              (card) =>
+                  card.cardId === e.target.parentNode.parentNode.parentNode.id
           );
-          document.getElementById(item.control_require_id).disabled = false;
-          item.controls = { control: [] };
+          document.getElementById(item.controlRequireId).disabled = false;
+          item.controls = {control: []};
         }
         let multiSelectParentDiv = document.createElement("div");
         multiSelectParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between"
+            "class",
+            "d-flex justify-content-between"
         );
 
         let multiSelectDiv = document.createElement("div");
 
         multiSelectDiv.setAttribute("class", "input-group input-group-outline");
         multiSelectDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id + "_div_multi_select"
+            "id",
+            e.target.parentNode.parentNode.parentNode.id + "_div_multi_select"
         );
 
         multiSelectParentDiv.appendChild(multiSelectDiv);
@@ -1742,47 +1871,47 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let selectInputParentDiv = document.createElement("div");
         selectInputParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between my-4"
+            "class",
+            "d-flex justify-content-between my-4"
         );
 
         let inputMultiSelectDiv = document.createElement("div");
         inputMultiSelectDiv.setAttribute(
-          "class",
-          "input-group input-group-outline"
+            "class",
+            "input-group input-group-outline"
         );
         inputMultiSelectDiv.setAttribute(
-          "id",
-          e.target.parentNode.parentNode.parentNode.id +
+            "id",
+            e.target.parentNode.parentNode.parentNode.id +
             "_div_multi_Input_Select"
         );
         selectInputParentDiv.appendChild(inputMultiSelectDiv);
         bodyWrapper.appendChild(selectInputParentDiv);
 
         let getInputMultiSelectDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id +
+            e.target.parentNode.parentNode.parentNode.id +
             "_div_multi_Input_Select"
         );
         let inputControl = document.createElement("input");
         inputControl.id =
-          getInputMultiSelectDiv.id + "_multi_select_Input_" + 1;
+            getInputMultiSelectDiv.id + "_multi_select_Input_" + 1;
         inputControl.setAttribute("class", "user-input");
         inputControl.setAttribute(
-          "placeholder",
-          "Please enter options and press Enter..."
+            "placeholder",
+            "Please enter options and press Enter..."
         );
         getInputMultiSelectDiv.appendChild(inputControl);
 
         let getMultiSelectDiv = document.getElementById(
-          e.target.parentNode.parentNode.parentNode.id + "_div_multi_select"
+            e.target.parentNode.parentNode.parentNode.id + "_div_multi_select"
         );
 
         let multiSelectControl = document.createElement("select");
         multiSelectControl.id = getMultiSelectDiv.id + "_select_" + 1;
         multiSelectControl.setAttribute("class", "user-input");
         multiSelectControl.setAttribute(
-          "placeholder",
-          "Please enter your answere here..."
+            "placeholder",
+            "Please enter your answere here..."
         );
         multiSelectControl.multiple = true;
         getMultiSelectDiv.appendChild(multiSelectControl);
@@ -1792,28 +1921,28 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         });
 
         let card = builder.find(
-          (x) => x.card_id === e.target.parentNode.parentNode.parentNode.id
+            (x) => x.cardId === e.target.parentNode.parentNode.parentNode.id
         );
-        card.control_type = "Multi Select";
+        card.controlType = "MultiSelect";
         card.hasControls = true;
 
-        let controls = { control: [] };
+        let controls = {control: []};
 
-        let control = new Object();
+        let control = {};
         control.select_div = multiSelectDiv.id;
         control.select_input_div = inputMultiSelectDiv.id;
         control.select_inputcontrol_div = inputControl.id;
-        control.select_control_id = multiSelectControl.id;
-        control.select_control_type = multiSelectControl.type;
+        control.selectControlId = multiSelectControl.id;
+        control.selectControlType = multiSelectControl.type;
         control.placeholder = inputControl.placeholder;
 
-        control.options = { option: [] };
+        control.options = {option: []};
 
         controls.control.push(control);
 
         let index = builder.find(
-          (card) =>
-            card.card_id === e.target.parentNode.parentNode.parentNode.id
+            (card) =>
+                card.cardId === e.target.parentNode.parentNode.parentNode.id
         );
         index.controls = controls;
       } else if (element !== null) {
@@ -1823,16 +1952,16 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let multiSelectParentDiv = document.createElement("div");
         multiSelectParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between"
+            "class",
+            "d-flex justify-content-between"
         );
 
         let multiSelectDiv = document.createElement("div");
 
         multiSelectDiv.setAttribute("class", "input-group input-group-outline");
         multiSelectDiv.setAttribute(
-          "id",
-          element.controls.control[0].select_div
+            "id",
+            element.controls.control[0].select_div
         );
 
         multiSelectParentDiv.appendChild(multiSelectDiv);
@@ -1841,44 +1970,44 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let selectInputParentDiv = document.createElement("div");
         selectInputParentDiv.setAttribute(
-          "class",
-          "d-flex justify-content-between my-4"
+            "class",
+            "d-flex justify-content-between my-4"
         );
 
         let inputMultiSelectDiv = document.createElement("div");
         inputMultiSelectDiv.setAttribute(
-          "class",
-          "input-group input-group-outline"
+            "class",
+            "input-group input-group-outline"
         );
         inputMultiSelectDiv.setAttribute(
-          "id",
-          element.controls.control[0].select_input_div
+            "id",
+            element.controls.control[0].select_input_div
         );
         selectInputParentDiv.appendChild(inputMultiSelectDiv);
         bodyWrapper.appendChild(selectInputParentDiv);
 
         let getInputMultiSelectDiv = document.getElementById(
-          element.controls.control[0].select_input_div
+            element.controls.control[0].select_input_div
         );
         let inputControl = document.createElement("input");
         inputControl.id = element.controls.control[0].select_inputcontrol_div;
         inputControl.setAttribute("class", "user-input");
         inputControl.setAttribute(
-          "placeholder",
-          "Please enter options and press Enter..."
+            "placeholder",
+            "Please enter options and press Enter..."
         );
         getInputMultiSelectDiv.appendChild(inputControl);
 
         let getMultiSelectDiv = document.getElementById(
-          element.controls.control[0].select_div
+            element.controls.control[0].select_div
         );
 
         let multiSelectControl = document.createElement("select");
-        multiSelectControl.id = element.controls.control[0].select_control_id;
+        multiSelectControl.id = element.controls.control[0].selectControlId;
         multiSelectControl.setAttribute("class", "user-input");
         multiSelectControl.setAttribute(
-          "placeholder",
-          "Please enter your answere here..."
+            "placeholder",
+            "Please enter your answere here..."
         );
         multiSelectControl.multiple = true;
         getMultiSelectDiv.appendChild(multiSelectControl);
@@ -1889,6 +2018,15 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           option.text = item.option_text;
           option.disabled = item.option_disabled;
           option.selected = item.option_selected;
+          let dbId;
+          if (item.dbId) {
+            dbId = item.dbId;
+          } else {
+            dbId = crypto.randomUUID();
+            option.dbId = dbId;
+            item.dbId = dbId;
+          }
+          option.setAttribute("dbId", dbId);
 
           multiSelectControl.appendChild(option);
         });
@@ -1904,10 +2042,10 @@ const onInputTypeChange = (e, control, element) => {
   control.setAttribute("type", e.target.value);
   control.setAttribute("placeholder", "Please enter " + e.target.value);
   let index = builder.find(
-    (card) => card.card_id === e.target.parentNode.parentNode.parentNode.id
+      (card) => card.cardId === e.target.parentNode.parentNode.parentNode.id
   );
   index.controls.control.forEach((element) => {
-    element.inputControl_type = e.target.value;
+    element.inputControlType = e.target.value;
     element.placeholder = control.placeholder;
   });
 };
@@ -1915,47 +2053,59 @@ const enterItemToDropDownList = (e, selectControl) => {
   if (e.key === "Enter") {
     e.preventDefault();
     let option = document.createElement("option");
+    let dbId = crypto.randomUUID()
     option.value = e.target.value;
     option.text = e.target.value;
+    option.dbId = dbId;
+    option.setAttribute("dbId", dbId)
 
     selectControl.appendChild(option);
+    const regex = 'cardDiv_[0-9]+';
+    const ids = selectControl.id.match(regex);
+    if (ids === undefined || ids.isEmpty) {
+      console.log("this should not happen. Exiting")
+      return
+    }
+    const cardId = ids[0]
     e.target.value = "";
 
-    let options = new Object();
+    let options = {};
     options.option_text = option.text;
     options.option_value = option.value;
     options.option_disabled = option.disabled;
     options.option_selected = option.selected;
-
+    options.dbId = dbId;
     let item = builder.find(
-      (card) => card.controls.control[0].select_control_id === selectControl.id
+        (card) => card.cardId === cardId
     );
-    item.controls.control[0].options.option.push(options);
+    if (item) {
+      item.controls.control[0].options.option.push(options);
+    }
   }
 };
 const deleteRadioElement = (e, remove) => {
   let filterControls = builder
-    .find(
-      (card) =>
-        card.card_id === e.target.parentNode.parentNode.parentNode.parentNode.id
-    )
-    .controls.control.filter((x) => x.select_div_id !== e.target.parentNode.id);
+      .find(
+          (card) =>
+              card.cardId === e.target.parentNode.parentNode.parentNode.parentNode.id
+      )
+      .controls.control.filter((x) => x.selectDivId !== e.target.parentNode.id);
 
   let controls = builder.find(
-    (card) =>
-      card.card_id === e.target.parentNode.parentNode.parentNode.parentNode.id
+      (card) =>
+          card.cardId === e.target.parentNode.parentNode.parentNode.parentNode.id
   );
   controls.controls.control = filterControls;
   e.target.parentNode.parentNode.remove();
 };
 
 const AddNewOption = (
-  e,
-  controlType,
-  current,
-  radioDiv,
-  index,
-  hiddenIndexLabel
+    e,
+    controlType,
+    current,
+    radioDiv,
+    index,
+    hiddenIndexLabel
 ) => {
   e.preventDefault();
 
@@ -1968,23 +2118,21 @@ const AddNewOption = (
 
     AddRadioDiv.setAttribute("class", "d-flex align-item-center w-100");
     AddRadioDiv.setAttribute(
-      "id",
-      e.target.parentNode.parentNode.parentNode.parentNode.id +
+        "id",
+        e.target.parentNode.parentNode.parentNode.parentNode.id +
         "_divRadio_" +
         currentIndex
     );
 
     radioParentDiv.appendChild(AddRadioDiv);
 
-    let newRadio = radioDiv.parentNode.parentNode.insertBefore(
-      radioParentDiv,
-      radioDiv.parentNode
-    );
-
     let input = document.createElement("input");
     input.type = "Radio";
     input.name = e.target.parentNode.parentNode.parentNode.id;
     input.id = AddRadioDiv.id + "_radio_" + currentIndex;
+    let dbId = crypto.randomUUID()
+    input.dbId = dbId
+    input.setAttribute("dbId", dbId)
     let label = document.createElement("label");
     label.id = AddRadioDiv.id + "Option_" + currentIndex;
 
@@ -1993,8 +2141,8 @@ const AddNewOption = (
     let removeButton = document.createElement("button");
 
     removeButton.setAttribute(
-      "id",
-      e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
+        "id",
+        e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
     );
     removeButton.innerHTML = "x";
     removeButton.setAttribute("class", "btn-remove");
@@ -2012,27 +2160,28 @@ const AddNewOption = (
       deleteRadioElement(e, removeButton);
     });
 
-    let controls = { control: [] };
+    let controls = {control: []};
 
-    let control = new Object();
-    control.select_div_id =
-      e.target.parentNode.parentNode.parentNode.parentNode.id +
-      "_divRadio_" +
-      currentIndex;
-    control.select_control_id = input.id;
-    control.select_control_type = input.type;
+    let control = {};
+    control.selectDivId =
+        e.target.parentNode.parentNode.parentNode.parentNode.id +
+        "_divRadio_" +
+        currentIndex;
+    control.selectControlId = input.id;
+    control.selectControlType = input.type;
     control.placeholder = input.placeholder;
 
     control.text = label.innerHTML;
+    control.dbId = dbId
 
-    control.label_id = label.id;
+    control.labelId = label.id;
     control.label_type = label.tagName;
 
     controls.control.push(control);
 
     let item = builder.find(
-      (card) =>
-        card.card_id === e.target.parentNode.parentNode.parentNode.parentNode.id
+        (card) =>
+            card.cardId === e.target.parentNode.parentNode.parentNode.parentNode.id
     );
     item.controls.control.push(controls.control[0]);
 
@@ -2041,31 +2190,29 @@ const AddNewOption = (
   } else if (controlType === "Checkbox") {
     let checkboxParentDiv = document.createElement("div");
     checkboxParentDiv.setAttribute(
-      "class",
-      "d-flex justify-content-between py-2"
+        "class",
+        "d-flex justify-content-between py-2"
     );
 
     let AddCheckboxDiv = document.createElement("div");
     let currentIndex = updateRadioIndex(e);
     AddCheckboxDiv.setAttribute("class", "d-flex align-item-center w-100");
     AddCheckboxDiv.setAttribute(
-      "id",
-      e.target.parentNode.parentNode.parentNode.id +
+        "id",
+        e.target.parentNode.parentNode.parentNode.id +
         "_divCheckbox_" +
         currentIndex
     );
 
     checkboxParentDiv.appendChild(AddCheckboxDiv);
 
-    let newRadio = radioDiv.parentNode.parentNode.insertBefore(
-      checkboxParentDiv,
-      radioDiv.parentNode
-    );
-
+    let dbId = crypto.randomUUID()
     let input = document.createElement("input");
     input.type = "checkbox";
     input.name = e.target.parentNode.parentNode.parentNode.id;
     input.id = AddCheckboxDiv.id + "_checkbox_" + currentIndex;
+    input.dbId = dbId
+    input.setAttribute("dbId", dbId)
     let label = document.createElement("label");
     label.id = AddCheckboxDiv.id + "_checkboxOption_" + currentIndex;
 
@@ -2074,8 +2221,8 @@ const AddNewOption = (
     let removeButton = document.createElement("button");
 
     removeButton.setAttribute(
-      "id",
-      e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
+        "id",
+        e.target.parentNode.parentNode.parentNode.id + "_remove_" + index
     );
     removeButton.innerHTML = "x";
     removeButton.setAttribute("class", "btn-remove");
@@ -2091,27 +2238,28 @@ const AddNewOption = (
     removeButton.addEventListener("click", (e) => {
       deleteRadioElement(e, removeButton);
     });
-    let controls = { control: [] };
+    let controls = {control: []};
 
-    let control = new Object();
-    control.select_div_id =
-      e.target.parentNode.parentNode.parentNode.id +
-      "_divCheckbox_" +
-      currentIndex;
-    control.select_control_id = input.id;
-    control.select_control_type = input.type;
+    let control = {};
+    control.selectDivId =
+        e.target.parentNode.parentNode.parentNode.id +
+        "_divCheckbox_" +
+        currentIndex;
+    control.selectControlId = input.id;
+    control.selectControlType = input.type;
     control.placeholder = input.placeholder;
 
     control.text = label.innerHTML;
 
-    control.label_id = label.id;
+    control.labelId = label.id;
     control.label_type = label.tagName;
+    control.dbId = dbId
 
     controls.control.push(control);
 
     let item = builder.find(
-      (card) =>
-        card.card_id === e.target.parentNode.parentNode.parentNode.parentNode.id
+        (card) =>
+            card.cardId === e.target.parentNode.parentNode.parentNode.parentNode.id
     );
     item.controls.control.push(controls.control[0]);
 
@@ -2122,13 +2270,13 @@ const AddNewOption = (
 
 const updateRadioIndex = (e) => {
   let item = builder.find(
-    (card) =>
-      card.card_id === e.target.parentNode.parentNode.parentNode.parentNode.id
+      (card) =>
+          card.cardId === e.target.parentNode.parentNode.parentNode.parentNode.id
   );
 
-  let currnetIndex = parseInt(item.hiddenIndex) + 1;
-  item.hiddenIndex = currnetIndex;
-  return (currnetIndex = parseInt(currnetIndex));
+  let currentIndex = parseInt(item.hiddenIndex) + 1;
+  item.hiddenIndex = currentIndex;
+  return (parseInt(currentIndex));
 };
 
 const changeInputToLabel = (e, remove, prevValue) => {
@@ -2145,25 +2293,25 @@ const changeInputToLabel = (e, remove, prevValue) => {
     var newOption = document.createTextNode(e.target.value);
 
     let control = builder
-      .find(
-        (card) =>
-          card.card_id ===
-          e.target.parentNode.parentNode.parentNode.parentNode.id
-      )
-      .controls.control.find((x) => x.select_div_id === e.target.parentNode.id);
+        .find(
+            (card) =>
+                card.cardId ===
+                e.target.parentNode.parentNode.parentNode.parentNode.id
+        )
+        .controls.control.find((x) => x.selectDivId === e.target.parentNode.id);
 
     control.text = e.target.value;
 
     label.appendChild(newOption);
     label.setAttribute("class", "radio-label");
     label.addEventListener("click", (e) => {
-      editOnLableClick(e, remove);
+      editOnLabelClick(e, remove);
     });
     parent.replaceChild(label, replaceInputToLabel);
   }
 };
 
-const editOnLableClick = (e, remove) => {
+const editOnLabelClick = (e, remove) => {
   let parent = document.getElementById(e.target.parentNode.id);
   if (e.target.tagName === "LABEL" && e.target.value !== "") {
     let label = document.getElementById(e.target.id);
@@ -2199,56 +2347,42 @@ const editRadioOnClick = (e, remove) => {
   }
 };
 
-const printFormBuilder = () => {
-  let form_title_div = document.getElementById("form_title_div");
-  let form_title = document.getElementById("form_title");
-  let form_title_label = document.createElement("label");
-  form_title_label.id = form_title.id;
+const PrintFormBuilder = (jsonData, responsesString, pathwaysString) => {
+  const responses = JSON.parse(responsesString)
+  const pathways = JSON.parse(pathwaysString)
 
-  form_title_label.setAttribute(
-    "class",
-    "header-title-input header-title-label"
-  );
-  var form_title_label_text = document.createTextNode(form_title.value);
-
-  let form_description_div = document.getElementById("form_description_div");
-  let form_description = document.getElementById("form_description");
-  let form_description_label = document.createElement("label");
-  form_description_label.id = form_description.id;
-
-  form_description_label.setAttribute(
-    "class",
-    "header-discription-input header-description-label"
-  );
-  var form_description_label_text = document.createTextNode(
-    form_description.value
-  );
-
-  form_title_label.appendChild(form_title_label_text);
-  form_title_div.replaceChild(form_title_label, form_title);
-  form_description_label.appendChild(form_description_label_text);
-  form_description_div.replaceChild(form_description_label, form_description);
-
-  let form = { form: [] };
-  form.form_title = form_title_label_text;
-  form.form_description = form_description_label_text;
-  builder[0].form_details = form;
+  if (jsonData != null) {
+    let loadedData = JSON.parse(jsonData)
+    if (loadedData.questions) {
+      builder = loadedData.questions
+    }
+    let mainDiv = document.getElementById("div_drager");
+    mainDiv.innerHTML = "";
+    builder.forEach((element) => {
+      if (element.dbId === undefined) {
+        element.dbId = crypto.randomUUID();
+      }
+      createCardFromJSON(mainDiv, element);
+      questions++
+    });
+  }
 
   builder.forEach((element) => {
-    let card = document.getElementById(element.card_id);
-    let question = document.getElementById(element.question_id);
+    let card = document.getElementById(element.cardId);
+    let question = document.getElementById(element.questionId);
 
     if (question.value === "") {
       question.setAttribute("class", "question-input validation");
-      throw "";
+      alert('Must specify an input value');
+      return
     } else {
       question.setAttribute("class", "question-input");
       element.question = question.value;
     }
 
-    if (element.hasControls === undefined) {
+    if (element.hasControls === undefined && (element.controlType !== "Pathways") && element.controlType !== "Signature") {
       card.setAttribute("class", "card p-3 my-3 box-shadow-validation");
-      throw "";
+      alert('Must specify controls');
     } else if (element.hasControls !== undefined) {
       card.setAttribute("class", "card p-3 my-3");
     }
@@ -2256,20 +2390,24 @@ const printFormBuilder = () => {
 
   let mainDiv = document.getElementById("div_drager");
   mainDiv.innerHTML = "";
-
+  let index = 0;
   builder.forEach((element) => {
-    if (element.question !== undefined && element.hasControls === true) {
-      if (element.control_type === "Input") {
+    let questionInput;
+    let response = responses.find(resp => element.dbId === resp.questionId);
+
+    if (element.question !== undefined && (element.hasControls === true || (element.controlType === "Pathways" || element.controlType === "Signature"))) {
+      if (element.controlType === "Input") {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2277,7 +2415,7 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
@@ -2286,24 +2424,29 @@ const printFormBuilder = () => {
 
         let input = document.createElement("input");
         input.setAttribute("class", "user-input-label");
-        input.id = element.controls.control[0].inputControl_id;
+        input.id = element.controls.control[0].inputControlId;
         input.placeholder = element.controls.control[0].placeholder;
-        input.type = element.controls.control[0].inputControl_type;
+        input.type = element.controls.control[0].inputControlType;
+        input.disabled = true;
+        if (response) {
+          input.value = response.response;
+        }
 
-        input.required = element.controls.control[0].is_requried;
+        input.required = element.isRequired;
         inputParentDiv.appendChild(input);
         bodyWrapper.appendChild(inputParentDiv);
-      } else if (element.control_type === "Multiline Text") {
+      } else if (element.controlType === "MultilineText") {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2311,7 +2454,7 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
@@ -2320,23 +2463,26 @@ const printFormBuilder = () => {
 
         let input = document.createElement("textarea");
         input.setAttribute("class", "user-textarea-label");
-        input.id = element.controls.control[0].inputControl_id;
+        input.id = element.controls.control[0].inputControlId;
         input.placeholder = element.controls.control[0].placeholder;
+        input.disabled = true;
+        input.innerText = response.response;
 
-        input.required = element.controls.control[0].is_requried;
+        input.required = element.isRequired;
         inputParentDiv.appendChild(input);
         bodyWrapper.appendChild(inputParentDiv);
-      } else if (element.control_type === "Date") {
+      } else if (element.controlType === "Date") {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2344,7 +2490,7 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
@@ -2353,24 +2499,30 @@ const printFormBuilder = () => {
 
         let input = document.createElement("input");
         input.setAttribute("class", "user-input-label date_items");
-        input.id = element.controls.control[0].inputControl_id;
+        input.id = element.controls.control[0].inputControlId;
         input.placeholder = element.controls.control[0].placeholder;
-        input.type = element.controls.control[0].inputControl_type;
+        input.type = element.controls.control[0].inputControlType;
+        input.disabled = true;
+        if (response) {
+          input.value = response.response;
+        }
 
-        input.required = element.controls.control[0].is_requried;
+
+        input.required = element.isRequired;
         inputParentDiv.appendChild(input);
         bodyWrapper.appendChild(inputParentDiv);
-      } else if (element.control_type === "I Understand") {
+      } else if (element.controlType === "IUnderstand") {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2378,7 +2530,7 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
@@ -2387,17 +2539,26 @@ const printFormBuilder = () => {
 
         let controldiv = document.createElement("div");
         controldiv.setAttribute("class", "d-flex align-item-center w-100");
-        controldiv.id = element.controls.control[0].input_div_id;
+        controldiv.id = element.controls.control[0].inputDivId;
 
         let input = document.createElement("input");
-        input.id = element.controls.control[0].inputControl_id;
+        input.id = element.controls.control[0].inputControlId;
         input.placeholder = element.controls.control[0].placeholder;
-        input.type = element.controls.control[0].inputControl_type;
-
-        input.required = element.controls.control[0].is_requried;
+        input.type = element.controls.control[0].inputControlType;
+        input.disabled = true;
+        input.checked = JSON.parse(response.response.toLowerCase());
+        let dbId;
+        if (element.controls.control[0].dbId) {
+          dbId = element.controls.control[0].dbId
+        } else {
+          dbId = crypto.randomUUID()
+          element.controls.control[0].dbId = dbId
+        }
+        input.setAttribute("dbId", dbId);
+        input.required = element.isRequired;
 
         let label = document.createElement("label");
-        label.id = element.controls.control[0].label_id;
+        label.id = element.controls.control[0].labelId;
 
         let textYes = document.createTextNode(element.controls.control[0].text);
 
@@ -2407,20 +2568,18 @@ const printFormBuilder = () => {
         label.setAttribute("class", "radio-label-label");
         groupDiv.appendChild(controldiv);
         bodyWrapper.appendChild(groupDiv);
-      } else if (
-        element.control_type === "Single Select" ||
-        element.control_type === "Multi Select"
-      ) {
+      } else if (element.controlType === "Pathways") {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2428,7 +2587,7 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
@@ -2437,40 +2596,37 @@ const printFormBuilder = () => {
 
         let selectControl = document.createElement("select");
         selectControl.setAttribute("class", "user-input-label");
-        selectControl.id = element.controls.control[0].select_control_id;
-        selectControl.placeholder = element.controls.control[0].placeholder;
+        selectControl.disabled = true;
 
-        selectControl.required = element.controls.control[0].is_requried;
-
-        if (element.control_type === "Multi Select") {
-          selectControl.multiple = true;
-        }
+        selectControl.required = element.isRequired;
 
         inputParentDiv.appendChild(selectControl);
         bodyWrapper.appendChild(inputParentDiv);
 
-        let control = document.getElementById(selectControl.id);
-
-        element.controls.control[0].options.option.forEach((item) => {
+        pathways.forEach((item) => {
           let control_option = document.createElement("option");
-          control_option.text = item.option_text;
-          control_option.value = item.option_value;
-          control_option.disabled = item.option_disabled;
-          control_option.selected = item.option_selected;
+          control_option.text = item.value;
+          control_option.value = item.value;
+          control_option.disabled = false;
+          control_option.selected = response ? response.response === item.id : false;
 
-          control.appendChild(control_option);
+          selectControl.appendChild(control_option);
         });
-      } else if (element.control_type === "Yes/No") {
+      } else if (
+          element.controlType === "SingleSelect" ||
+          element.controlType === "MultiSelect"
+      ) {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2478,25 +2634,95 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
+        let inputParentDiv = document.createElement("div");
+        inputParentDiv.setAttribute("class", "d-flex justify-content-between");
+
+        let selectControl = document.createElement("select");
+        selectControl.setAttribute("class", "user-input-label");
+        selectControl.id = element.controls.control[0].selectControlId;
+        selectControl.placeholder = element.controls.control[0].placeholder;
+        selectControl.disabled = true;
+        selectControl.required = element.isRequired;
+
+        if (element.controlType === "MultiSelect") {
+          selectControl.multiple = true;
+        }
+
+        inputParentDiv.appendChild(selectControl);
+        bodyWrapper.appendChild(inputParentDiv);
+
+        let control = document.getElementById(selectControl.id);
+        let userResponses = response.response.split(',')
+        element.controls.control[0].options.option.forEach((item) => {
+          let control_option = document.createElement("option");
+          control_option.text = item.option_text;
+          control_option.value = item.option_value;
+          let dbId;
+          if (item.dbId) {
+            dbId = item.dbId;
+          } else {
+            dbId = crypto.randomUUID();
+            control_option.dbId = dbId;
+            item.dbId = dbId;
+          }
+          control_option.setAttribute("dbId", dbId);
+          control_option.disabled = item.option_disabled;
+          control_option.selected = userResponses.includes(item.dbId);
+
+          control.appendChild(control_option);
+        });
+      } else if (element.controlType === "YesNo") {
+        let inputCard = document.createElement("div");
+        let innerDiv = document.createElement("div");
+        questionInput = document.createElement("label");
+
+        innerDiv.setAttribute("class", "d-flex justify-content-between");
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
+        inputCard.setAttribute("class", "card p-3 my-3");
+        questionInput.setAttribute("class", "question-input-label");
+        questionInput.setAttribute("placeholder", "Question");
+        questionInput.setAttribute("id", element.questionId);
+        questionInput.innerText = element.question;
+
+        inputCard.appendChild(innerDiv);
+        mainDiv.appendChild(inputCard);
+        innerDiv.appendChild(questionInput);
+
+        let bodyWrapper = document.createElement("div");
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
+        bodyWrapper.setAttribute("class", "body-wrapper");
+        inputCard.appendChild(bodyWrapper);
         element.controls.control.forEach((option) => {
           let groupDiv = document.createElement("div");
           groupDiv.setAttribute("class", "d-flex justify-content-between py-2");
 
           let controldiv = document.createElement("div");
           controldiv.setAttribute("class", "d-flex align-item-center w-100");
-          controldiv.id = option.select_div_id;
+          controldiv.id = option.selectDivId;
 
           let input = document.createElement("input");
-          input.id = option.select_control_id;
+          input.id = option.selectControlId;
           input.placeholder = option.placeholder;
-          input.type = option.select_control_type;
+          input.type = option.selectControlType;
           input.name = bodyWrapper.id;
+          let dbId;
+          if (option.dbId) {
+            dbId = option.dbId;
+          } else {
+            dbId = crypto.randomUUID();
+            input.dbId = dbId
+            option.dbId = dbId;
+          }
+          input.setAttribute("dbId", dbId)
+          input.checked = dbId === response.response
+          input.disabled = true
 
-          input.required = option.is_requried;
+          input.required = option.isRequired;
           let label = document.createElement("label");
           let textYes = document.createTextNode(option.text);
 
@@ -2508,19 +2734,20 @@ const printFormBuilder = () => {
           bodyWrapper.appendChild(groupDiv);
         });
       } else if (
-        element.control_type === "Radio" ||
-        element.control_type === "Checkbox"
+          element.controlType === "Radio" ||
+          element.controlType === "Checkbox"
       ) {
         let inputCard = document.createElement("div");
         let innerDiv = document.createElement("div");
-        var questionInput = document.createElement("label");
+        questionInput = document.createElement("label");
 
         innerDiv.setAttribute("class", "d-flex justify-content-between");
-        inputCard.setAttribute("id", element.card_id);
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
         inputCard.setAttribute("class", "card p-3 my-3");
         questionInput.setAttribute("class", "question-input-label");
         questionInput.setAttribute("placeholder", "Question");
-        questionInput.setAttribute("id", element.question_id);
+        questionInput.setAttribute("id", element.questionId);
         questionInput.innerText = element.question;
 
         inputCard.appendChild(innerDiv);
@@ -2528,7 +2755,7 @@ const printFormBuilder = () => {
         innerDiv.appendChild(questionInput);
 
         let bodyWrapper = document.createElement("div");
-        bodyWrapper.setAttribute("id", element.bodyWrapperId_id);
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
         bodyWrapper.setAttribute("class", "body-wrapper");
         inputCard.appendChild(bodyWrapper);
 
@@ -2538,20 +2765,31 @@ const printFormBuilder = () => {
 
           let controldiv = document.createElement("div");
           controldiv.setAttribute("class", "d-flex align-item-center w-100");
-          controldiv.id = option.select_div_id;
+          controldiv.id = option.selectDivId;
 
           let input = document.createElement("input");
-          input.id = option.select_control_id;
+          input.id = option.selectControlId;
           input.placeholder = option.placeholder;
-          input.type = option.select_control_type;
+          input.type = option.selectControlType;
           input.name = bodyWrapper.id;
+          let dbId;
+          if (option.dbId) {
+            dbId = option.dbId;
+          } else {
+            dbId = crypto.randomUUID();
+            input.dbId = dbId;
+            option.dbId = dbId
+          }
+          input.setAttribute("dbId", dbId);
+          input.checked = option.dbId === response.response
+          input.disabled = true
 
-          if (element.control_type === "Radio") {
-            input.required = option.is_requried;
+          if (element.controlType === "Radio") {
+            input.required = option.isRequired;
           }
 
           let label = document.createElement("label");
-          label.id = option.label_id;
+          label.id = option.labelId;
           let textYes = document.createTextNode(option.text);
 
           label.appendChild(textYes);
@@ -2561,24 +2799,55 @@ const printFormBuilder = () => {
           groupDiv.appendChild(controldiv);
           bodyWrapper.appendChild(groupDiv);
         });
+      } else if (element.controlType === "Signature") {
+        let inputCard = document.createElement("div");
+        let innerDiv = document.createElement("div");
+        questionInput = document.createElement("label");
+
+        innerDiv.setAttribute("class", "d-flex justify-content-between");
+        inputCard.setAttribute("id", element.cardId);
+        inputCard.setAttribute("dbId", element.dbId);
+        inputCard.setAttribute("class", "card p-3 my-3");
+        questionInput.setAttribute("class", "question-input-label");
+        questionInput.setAttribute("placeholder", "Question");
+        questionInput.setAttribute("id", element.questionId);
+        questionInput.innerText = element.question;
+
+        inputCard.appendChild(innerDiv);
+        mainDiv.appendChild(inputCard);
+        innerDiv.appendChild(questionInput);
+
+        let bodyWrapper = document.createElement("div");
+        bodyWrapper.setAttribute("id", element.bodyWrapperIdId);
+        bodyWrapper.setAttribute("class", "body-wrapper");
+        inputCard.appendChild(bodyWrapper);
+
+        let inputParentDiv = document.createElement("div");
+        inputParentDiv.setAttribute("class", "d-flex justify-content-between");
+
+        let img = document.createElement("img")
+        img.src = `data:image/png;base64,${response.response}`
+        inputParentDiv.appendChild(img)
+        bodyWrapper.appendChild(inputParentDiv);
       }
     }
+    index++;
   });
-  validateCheckboxes({ currentTarget: form_builder });
+  validateCheckboxes({currentTarget: form_builder});
   form_builder.addEventListener("change", validateCheckboxes);
 };
 const validateCheckboxes = (e) => {
   let wrappers = Array.from(
-    e.currentTarget.querySelectorAll(":scope .body-wrapper")
+      e.currentTarget.querySelectorAll(":scope .body-wrapper")
   );
   builder.forEach((element) => {
     let control = builder
-      .find((card) => card.card_id === element.card_id)
-      .controls.control.find((x) => x.select_control_type === "checkbox");
+        .find((card) => card.cardId === element.cardId)
+        .controls.control.find((x) => x.selectControlType === "checkbox");
     if (control !== undefined) {
-      if (control.is_requried !== true) {
+      if (control.isRequired !== true) {
         let index = wrappers.indexOf(
-          wrappers.find((x) => x.id === element.bodyWrapperId_id)
+            wrappers.find((x) => x.id === element.bodyWrapperIdId)
         );
         if (index > -1) {
           wrappers.splice(index, 1);
@@ -2586,7 +2855,7 @@ const validateCheckboxes = (e) => {
       }
     } else if (control === undefined) {
       let index = wrappers.indexOf(
-        wrappers.find((x) => x.id === element.bodyWrapperId_id)
+          wrappers.find((x) => x.id === element.bodyWrapperIdId)
       );
       if (index > -1) {
         wrappers.splice(index, 1);
@@ -2594,90 +2863,77 @@ const validateCheckboxes = (e) => {
     }
   });
   form_submit.disabled = wrappers.reduce(
-    (aggr, bodyWrapper) =>
-      aggr ||
-      bodyWrapper.querySelectorAll(":scope input[type=checkbox]:checked")
-        .length < 1,
-    false
+      (aggr, bodyWrapper) =>
+          aggr ||
+          bodyWrapper.querySelectorAll(":scope input[type=checkbox]:checked")
+              .length < 1,
+      false
   );
 };
 const SaveFormBuilder = () => {
   let is_completed = true;
-  let form_title = document.getElementById("form_title");
-  let form_description = document.getElementById("form_description");
 
-  if (form_title.value === "") {
-    form_title.setAttribute("class", "header-title-input validation");
-    form_title.focus();
-    is_completed = false;
-    throw "Form Title cannot be null";
-  } else if (form_title.value !== "") {
-    form_title.setAttribute("class", "header-title-input");
-  }
-  if (form_description.value === "") {
-    form_description.setAttribute(
-      "class",
-      "header-discription-input validation"
-    );
-    form_description.focus();
-    is_completed = false;
-    throw "Form Title cannot be null";
-  } else if (form_description.value !== "") {
-    form_description.setAttribute("class", "header-discription-input");
-  }
 
   if (builder.length === 0) {
     alert("Please create form");
-    throw "Please create form";
+    return
   }
   builder.forEach((element) => {
     is_completed = true;
-    let question = document.getElementById(element.question_id);
-    let bodyWrapper = document.getElementById(element.bodyWrapperId_id);
+    let question = document.getElementById(element.questionId);
+    if (!question) {
+      return
+    }
+    let bodyWrapper = document.getElementById(element.bodyWrapperIdId);
 
     if (question.value !== "") {
       element.question = question.value;
-    } else if (question.value === "") {
+    } else if (question.value === "" && (element.controlType !== "Pathways" && element.controlType !== "Signature")) {
       is_completed = false;
       question.setAttribute("class", "question-input validation");
-      throw "value cannot be empty";
+      alert("Value cannot be empty");
+      return;
     }
 
-    let select_type = document.getElementById(element.selectTag_id);
+    let select_type = document.getElementById(element.selectTagId);
     if (select_type.value === "Select" || select_type.selectedIndex === 0) {
       is_completed = false;
       select_type.setAttribute("class", "select-control validation");
-      throw "value cannot be empty";
+      alert("Must select a question type");
+      return;
     } else if (
-      select_type.value !== "Select" ||
-      select_type.selectedIndex !== 0
+        select_type.value !== "Select" ||
+        select_type.selectedIndex !== 0
     ) {
       select_type.setAttribute("class", "select-control");
     }
-    if (element.hasControls === undefined) {
+    if (element.hasControls === undefined && (element.controlType !== "Pathways" && element.controlType !== "Signature")) {
       if (bodyWrapper.innerHTML === "") {
         is_completed = false;
         bodyWrapper.setAttribute("class", "validation-wrapper");
-        throw "value cannot be empty";
+        alert("Value without controls cannot be empty");
+        return;
       }
     } else if (element.hasControls !== undefined) {
       if (element.controls.control.length === 0) {
         bodyWrapper.setAttribute("class", "validation-wrapper");
         is_completed = false;
-        throw "value cannot be empty";
+        alert("Value with controls cannot be empty");
+        return;
       } else if (element.controls.control.length > 0) {
         bodyWrapper.setAttribute("class", "body-wrapper");
       }
     }
 
     if (
-      element.control_type === "Multi Select" ||
-      element.control_type === "Single Select"
+        element.controlType === "MultiSelect" ||
+        element.controlType === "SingleSelect"
     ) {
       if (element.controls.control[0].options.option.length === 0) {
         bodyWrapper.setAttribute("class", "validation-wrapper");
         is_completed = false;
-        throw "value cannot be empty";
+        alert("Value for control cannot be empty");
+
       } else if (element.controls.control[0].options.option.length > 0) {
         bodyWrapper.setAttribute("class", "body-wrapper");
       }
@@ -2686,52 +2942,50 @@ const SaveFormBuilder = () => {
 
   //convert data to json
   if (is_completed) {
-    let forms = {};
-    forms.form_title = form_title.value;
-    forms.form_description = form_description.value;
-    builder[0].forms = forms;
-    jsonData = JSON.stringify(builder);
-    // console.log(jsonData);
-    let mainDiv = document.getElementById("div_drager");
-    mainDiv.innerHTML = "";
-    builder = [];
+    jsonData = JSON.stringify({
+      questions: builder,
+    });
     //post data to database using API and pass builder as parameter
+    let url = `/application`
+    fetch(url, {
+      method: "POST",
+      headers: {'Content-Type': 'application/json'},
+      body: jsonData
+    })
+        .then((response) => response.json())
+        .then(async data => {
+          if (data.error) {
+            await new BsDialogs().ok('Uh Oh', 'We had an error saving your application\n' + data.error);
+          } else {
+            await new BsDialogs().ok('Success', 'We successfully saved your application');
+            window.location.reload();
+          }
+        })
+        .catch(async error => {
+          await new BsDialogs().ok('Uh Oh!', 'We had an error saving your application\n' + error);
+        });
   }
 };
 
-const LoadFormBuilder = () => {
+const LoadFormBuilder = (jsonData) => {
   builder = [];
 
   //Call API here to load data from database
 
   if (jsonData != null) {
-    builder = JSON.parse(jsonData);
+    let loadedData = JSON.parse(jsonData)
+    if (loadedData.questions) {
+      builder = loadedData.questions
+    }
     let mainDiv = document.getElementById("div_drager");
     mainDiv.innerHTML = "";
-    let form_title_div = document.getElementById("form_title_div");
-    let form_title = document.getElementById("form_title");
-    let form_title_input = document.createElement("input");
-    form_title_input.id = form_title.id;
-
-    form_title_input.setAttribute("class", "header-title-input");
-
-    let form_description_div = document.getElementById("form_description_div");
-    let form_description = document.getElementById("form_description");
-    let form_description_input = document.createElement("input");
-    form_description_input.id = form_description.id;
-
-    form_description_input.setAttribute("class", "header-discription-input");
-
-    form_title_div.replaceChild(form_title_input, form_title);
-    form_description_div.replaceChild(form_description_input, form_description);
-
-    form_title_input.value = builder[0].forms.form_title;
-    form_description_input.value = builder[0].forms.form_description;
     builder.forEach((element) => {
+      if (element.dbId === undefined) {
+        element.dbId = crypto.randomUUID();
+      }
       createCardFromJSON(mainDiv, element);
+      questions++
     });
-
-    // console.log(builder);
   }
 };
 
@@ -2749,18 +3003,23 @@ const createCardFromJSON = (mainDiv, elements) => {
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
   var formCheck = document.createElement("div");
-  var imgDelete = document.createElement("img");
+  var imgDeleteWrapper = document.createElement("div");
+  var imgDelete = document.createElement("i");
 
-  element.setAttribute("id", elements.card_id);
+  element.setAttribute("id", elements.cardId);
+  if (element.dbId === undefined) {
+    element.setAttribute("dbId", crypto.randomUUID())
+  } else {
+    element.setAttribute("dbId", elements.dbId)
+  }
 
-  var input = document.createElement("input");
+  let input = document.createElement("input");
   input.setAttribute("id", elements.inputId);
   input.setAttribute("style", "font-weight: bolder;");
 
-  var select = document.createElement("select");
-  selectTag.id = elements.selectTag_id;
+  selectTag.id = elements.selectTagId;
 
-  bodyWrapper.id = elements.bodyWrapperId_id;
+  bodyWrapper.id = elements.bodyWrapperIdId;
 
   element.setAttribute("class", "card p-3 my-3");
   innerDiv.setAttribute("class", "d-flex justify-content-between");
@@ -2768,30 +3027,32 @@ const createCardFromJSON = (mainDiv, elements) => {
   selectGroup.setAttribute("class", "select-group");
   questionInput.setAttribute("class", "question-input");
   questionInput.setAttribute("placeholder", "Question");
-  questionInput.setAttribute("id", elements.question_id);
+  questionInput.setAttribute("id", elements.questionId);
 
   questionInput.value = elements.question;
 
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
   actionWrapper.setAttribute("class", "action-wrapper");
-  imgDelete.setAttribute("src", "/assets/img/delete-icon.png");
-  imgDelete.setAttribute("width", "20");
+  imgDelete.innerText = "delete"
+  imgDeleteWrapper.setAttribute("class", "text-center me-2 d-flex align-items-center justify-content-center");
+  imgDeleteWrapper.appendChild(imgDelete);
+  imgDelete.setAttribute("class", "material-icons opacity-50");
   footerLabel.setAttribute("class", "footer-label");
   formCheck.setAttribute("class", "form-check form-switch ps-0");
 
   requiredWrapper.setAttribute(
-    "class",
-    "d-flex align-items-center required-wrapper"
+      "class",
+      "d-flex align-items-center required-wrapper"
   );
   footerWrapper.setAttribute(
-    "class",
-    "footer-wrapper d-flex justify-content-end align-items-centerce"
+      "class",
+      "footer-wrapper d-flex justify-content-end align-items-center"
   );
   inputCheckBox.setAttribute("class", "form-check-input ms-auto");
   inputCheckBox.setAttribute("type", "checkbox");
-  inputCheckBox.id = elements.control_require_id;
-  inputCheckBox.checked = elements.controls.control[0].is_requried;
+  inputCheckBox.id = elements.controlRequireId;
+  inputCheckBox.checked = elements.isRequired;
 
   footerLabel.innerHTML = "Required";
   mainDiv.appendChild(element);
@@ -2803,7 +3064,7 @@ const createCardFromJSON = (mainDiv, elements) => {
   element.appendChild(bodyWrapper);
   element.appendChild(footerWrapper);
   footerWrapper.appendChild(actionWrapper);
-  actionWrapper.appendChild(imgDelete);
+  actionWrapper.appendChild(imgDeleteWrapper);
   footerWrapper.appendChild(requiredWrapper);
   requiredWrapper.appendChild(footerLabel);
   requiredWrapper.appendChild(formCheck);
@@ -2814,6 +3075,7 @@ const createCardFromJSON = (mainDiv, elements) => {
   });
 
   inputCheckBox.addEventListener("change", (e) => {
+    object.isRequired = e.target.checked;
     RequiredChanged(e, bodyWrapper);
   });
 
@@ -2821,7 +3083,7 @@ const createCardFromJSON = (mainDiv, elements) => {
     var option = document.createElement("option");
     option.value = listControls[i];
     option.text = listControls[i];
-    if (option.value === elements.control_type) {
+    if (option.value === elements.controlType) {
       option.selected = true;
     }
     selectTag.appendChild(option);
@@ -2832,11 +3094,11 @@ const createCardFromJSON = (mainDiv, elements) => {
   input.addEventListener("focusout", ElementHeaderInput, false);
 
   selectTag.addEventListener(
-    "change",
-    (e) => {
-      selectItemChanged(e, elements.bodyWrapperId_id, elements);
-    },
-    false
+      "change",
+      (e) => {
+        selectItemChanged(e, elements.bodyWrapperIdId, elements);
+      },
+      false
   );
   selectTag.dispatchEvent(new Event("change"));
 };
