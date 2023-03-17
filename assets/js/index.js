@@ -24,6 +24,9 @@ var jsonData = "";
 const form_builder = document.getElementById("form_builder");
 const form_submit = document.getElementById("form_submit");
 
+let dropTarget;
+var mySortable;
+
 const addDivElement = () => {
   const mainDiv = document.getElementById("div_drager");
   var element = document.createElement("div");
@@ -35,6 +38,8 @@ const addDivElement = () => {
   var selectTag = document.createElement("select");
   var bodyWrapper = document.createElement("div");
   var footerWrapper = document.createElement("div");
+  var actionDragWrapper = document.createElement("div")
+  var imgDrag = document.createElement("img")
   var actionWrapper = document.createElement("div");
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
@@ -58,7 +63,7 @@ const addDivElement = () => {
   let bodyWrapperId = "bodyWrapper_" + controlId;
   bodyWrapper.id = bodyWrapperId;
 
-  element.setAttribute("class", "card p-3 my-3");
+  element.setAttribute("class", "card p-3 my-3 drop-item");
   innerDiv.setAttribute("class", "d-flex justify-content-between");
   inputGroup.setAttribute("class", "input-group input-group-outline");
   selectGroup.setAttribute("class", "select-group");
@@ -67,6 +72,9 @@ const addDivElement = () => {
   questionInput.setAttribute("id", "Question_Input_" + controlId);
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
+  actionDragWrapper.setAttribute("class", "actionDrag-wrapper")
+  imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
+  imgDrag.setAttribute("width", "20");
   actionWrapper.setAttribute("class", "action-wrapper");
   imgDelete.setAttribute("src", "/assets/img/delete-icon.png");
   imgDelete.setAttribute("width", "20");
@@ -107,7 +115,9 @@ const addDivElement = () => {
   selectGroup.appendChild(selectTag);
   element.appendChild(bodyWrapper);
   element.appendChild(footerWrapper);
+  footerWrapper.appendChild(actionDragWrapper);
   footerWrapper.appendChild(actionWrapper);
+  actionDragWrapper.appendChild(imgDrag);
   actionWrapper.appendChild(imgDelete);
   footerWrapper.appendChild(requiredWrapper);
   requiredWrapper.appendChild(footerLabel);
@@ -140,7 +150,38 @@ const addDivElement = () => {
     },
     false
   );
+
+  dropTarget = document.getElementById("div_drager");
+
+  if (builder.length >= 2) {
+    mySortable = Sortable.create(dropTarget, {
+      easing: "cubic-bezier(1, 0, 0, 1)",
+      chosenClass: "sortable-chosen",
+      sort: true,
+      animation: 150,
+
+      onEnd: function (evt) {
+        var oldIndex = evt.oldIndex;
+        var newIndex = evt.newIndex;
+
+        if (oldIndex !== newIndex) {
+          const query = document.querySelector("#div_drager")
+          const childNodes = query.children
+          const builderArray = [...builder]
+          builder = [];
+          for (let i = 0; i < builderArray.length; i++) {
+            const id = childNodes[i].id
+            const chngedEle = builderArray.filter(ele => {
+              return ele.card_id.toString() === id.toString()
+            })
+            builder.push(chngedEle[0])
+          }
+        }
+      },
+    });
+  }
 };
+
 const deleteCard = (e, control) => {
   var shouldDelete = confirm("Do you really want to delete the selected card?");
   if (shouldDelete) {
@@ -755,8 +796,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             radioDiv.setAttribute(
               "id",
               e.target.parentNode.parentNode.parentNode.id +
-                "_divRadio_NewOption_" +
-                index
+              "_divRadio_NewOption_" +
+              index
             );
           }
 
@@ -771,8 +812,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           } else {
             getDiv = document.getElementById(
               e.target.parentNode.parentNode.parentNode.id +
-                "_divRadio_NewOption_" +
-                index
+              "_divRadio_NewOption_" +
+              index
             );
           }
 
@@ -877,8 +918,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           checkboxDiv.setAttribute(
             "id",
             e.target.parentNode.parentNode.parentNode.id +
-              "_divCheckbox_" +
-              index
+            "_divCheckbox_" +
+            index
           );
 
           checkboxParentDiv.appendChild(checkboxDiv);
@@ -887,8 +928,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
           let getCheckboxDiv = document.getElementById(
             e.target.parentNode.parentNode.parentNode.id +
-              "_divCheckbox_" +
-              index
+            "_divCheckbox_" +
+            index
           );
           let input = document.createElement("input");
           input.type = "checkbox";
@@ -1012,8 +1053,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
             checkboxDiv.setAttribute(
               "id",
               e.target.parentNode.parentNode.parentNode.id +
-                "_divCheckbox_NewOption_" +
-                index
+              "_divCheckbox_NewOption_" +
+              index
             );
           }
 
@@ -1030,8 +1071,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           } else {
             getCheckboxDiv = document.getElementById(
               e.target.parentNode.parentNode.parentNode.id +
-                "_divCheckbox_NewOption_" +
-                index
+              "_divCheckbox_NewOption_" +
+              index
             );
           }
 
@@ -1453,8 +1494,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
           radioYesNoDiv.setAttribute(
             "id",
             e.target.parentNode.parentNode.parentNode.id +
-              "_divRadioYesNo_" +
-              index
+            "_divRadioYesNo_" +
+            index
           );
 
           radioYesNoParentDiv.appendChild(radioYesNoDiv);
@@ -1463,8 +1504,8 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
           let getRadioYesNoDiv = document.getElementById(
             e.target.parentNode.parentNode.parentNode.id +
-              "_divRadioYesNo_" +
-              index
+            "_divRadioYesNo_" +
+            index
           );
           let input = document.createElement("input");
           input.type = "Radio";
@@ -1598,7 +1639,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         chkConsentDiv.setAttribute(
           "id",
           e.target.parentNode.parentNode.parentNode.id +
-            "_divCheckbox_Iunderstand"
+          "_divCheckbox_Iunderstand"
         );
 
         chkConsentParentDiv.appendChild(chkConsentDiv);
@@ -1607,7 +1648,7 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
 
         let getChkConsentDiv = document.getElementById(
           e.target.parentNode.parentNode.parentNode.id +
-            "_divCheckbox_Iunderstand"
+          "_divCheckbox_Iunderstand"
         );
         let input = document.createElement("input");
         input.type = "checkbox";
@@ -1754,14 +1795,14 @@ const selectItemChanged = (e, bodyWrapperId, element) => {
         inputMultiSelectDiv.setAttribute(
           "id",
           e.target.parentNode.parentNode.parentNode.id +
-            "_div_multi_Input_Select"
+          "_div_multi_Input_Select"
         );
         selectInputParentDiv.appendChild(inputMultiSelectDiv);
         bodyWrapper.appendChild(selectInputParentDiv);
 
         let getInputMultiSelectDiv = document.getElementById(
           e.target.parentNode.parentNode.parentNode.id +
-            "_div_multi_Input_Select"
+          "_div_multi_Input_Select"
         );
         let inputControl = document.createElement("input");
         inputControl.id =
@@ -1970,8 +2011,8 @@ const AddNewOption = (
     AddRadioDiv.setAttribute(
       "id",
       e.target.parentNode.parentNode.parentNode.parentNode.id +
-        "_divRadio_" +
-        currentIndex
+      "_divRadio_" +
+      currentIndex
     );
 
     radioParentDiv.appendChild(AddRadioDiv);
@@ -2051,8 +2092,8 @@ const AddNewOption = (
     AddCheckboxDiv.setAttribute(
       "id",
       e.target.parentNode.parentNode.parentNode.id +
-        "_divCheckbox_" +
-        currentIndex
+      "_divCheckbox_" +
+      currentIndex
     );
 
     checkboxParentDiv.appendChild(AddCheckboxDiv);
@@ -2200,6 +2241,8 @@ const editRadioOnClick = (e, remove) => {
 };
 
 const printFormBuilder = () => {
+  mySortable?.option("disabled", true);
+
   let form_title_div = document.getElementById("form_title_div");
   let form_title = document.getElementById("form_title");
   let form_title_label = document.createElement("label");
@@ -2602,6 +2645,8 @@ const validateCheckboxes = (e) => {
   );
 };
 const SaveFormBuilder = () => {
+  mySortable.option("disabled", false);
+
   let is_completed = true;
   let form_title = document.getElementById("form_title");
   let form_description = document.getElementById("form_description");
@@ -2691,7 +2736,6 @@ const SaveFormBuilder = () => {
     forms.form_description = form_description.value;
     builder[0].forms = forms;
     jsonData = JSON.stringify(builder);
-    // console.log(jsonData);
     let mainDiv = document.getElementById("div_drager");
     mainDiv.innerHTML = "";
     builder = [];
@@ -2700,11 +2744,13 @@ const SaveFormBuilder = () => {
 };
 
 const LoadFormBuilder = () => {
+  mySortable.option("disabled", false);
+
   builder = [];
 
   //Call API here to load data from database
 
-  if (jsonData != null) {
+  if (jsonData != null && jsonData.length !== 0) {
     builder = JSON.parse(jsonData);
     let mainDiv = document.getElementById("div_drager");
     mainDiv.innerHTML = "";
@@ -2731,7 +2777,6 @@ const LoadFormBuilder = () => {
       createCardFromJSON(mainDiv, element);
     });
 
-    // console.log(builder);
   }
 };
 
@@ -2745,6 +2790,8 @@ const createCardFromJSON = (mainDiv, elements) => {
   var selectTag = document.createElement("select");
   var bodyWrapper = document.createElement("div");
   var footerWrapper = document.createElement("div");
+  var actionDragWrapper = document.createElement("div");
+  var imgDrag = document.createElement("img");
   var actionWrapper = document.createElement("div");
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
@@ -2774,6 +2821,9 @@ const createCardFromJSON = (mainDiv, elements) => {
 
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
+  actionDragWrapper.setAttribute("class", "actionDrag-wrapper")
+  imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
+  imgDrag.setAttribute("width", "20");
   actionWrapper.setAttribute("class", "action-wrapper");
   imgDelete.setAttribute("src", "/assets/img/delete-icon.png");
   imgDelete.setAttribute("width", "20");
@@ -2803,6 +2853,8 @@ const createCardFromJSON = (mainDiv, elements) => {
   element.appendChild(bodyWrapper);
   element.appendChild(footerWrapper);
   footerWrapper.appendChild(actionWrapper);
+  footerWrapper.appendChild(actionDragWrapper);
+  actionDragWrapper.appendChild(imgDrag);
   actionWrapper.appendChild(imgDelete);
   footerWrapper.appendChild(requiredWrapper);
   requiredWrapper.appendChild(footerLabel);
@@ -2812,7 +2864,9 @@ const createCardFromJSON = (mainDiv, elements) => {
   imgDelete.addEventListener("click", (e) => {
     deleteCard(e, element);
   });
-
+  imgDrag.addEventListener("drag", (e) => {
+    dragCard(e, element);
+  });
   inputCheckBox.addEventListener("change", (e) => {
     RequiredChanged(e, bodyWrapper);
   });
