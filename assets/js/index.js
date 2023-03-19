@@ -23,6 +23,9 @@ var jsonData = "";
 const form_builder = document.getElementById("form_builder");
 const form_submit = document.getElementById("btnSave");
 
+let dropTarget;
+var mySortable;
+
 const addDivElement = () => {
   questions++;
   const mainDiv = document.getElementById("div_drager");
@@ -35,6 +38,8 @@ const addDivElement = () => {
   var selectTag = document.createElement("select");
   var bodyWrapper = document.createElement("div");
   var footerWrapper = document.createElement("div");
+  var actionDragWrapper = document.createElement("div");
+  var imgDrag = document.createElement("img");
   var actionWrapper = document.createElement("div");
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
@@ -59,7 +64,8 @@ const addDivElement = () => {
   let bodyWrapperId = "bodyWrapper_" + controlId;
   bodyWrapper.id = bodyWrapperId;
 
-  element.setAttribute("class", "card p-3 my-3");
+  // element.setAttribute("class", "card p-3 my-3");
+  element.setAttribute("class", "card p-3 my-3 drop-item");
   innerDiv.setAttribute("class", "d-flex justify-content-between");
   inputGroup.setAttribute("class", "input-group input-group-outline");
   selectGroup.setAttribute("class", "select-group");
@@ -68,6 +74,9 @@ const addDivElement = () => {
   questionInput.setAttribute("id", "Question_Input_" + controlId);
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
+  actionDragWrapper.setAttribute("class", "actionDrag-wrapper")
+  imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
+  imgDrag.setAttribute("width", "20");
   actionWrapper.setAttribute("class", "action-wrapper");
   imgDelete.innerText = "delete"
   imgDeleteWrapper.setAttribute("class", "text-center me-2 d-flex align-items-center justify-content-center");
@@ -112,7 +121,9 @@ const addDivElement = () => {
   selectGroup.appendChild(selectTag);
   element.appendChild(bodyWrapper);
   element.appendChild(footerWrapper);
+  footerWrapper.appendChild(actionDragWrapper);
   footerWrapper.appendChild(actionWrapper);
+  actionDragWrapper.appendChild(imgDrag);
   actionWrapper.appendChild(imgDeleteWrapper);
   footerWrapper.appendChild(requiredWrapper);
   requiredWrapper.appendChild(footerLabel);
@@ -146,7 +157,37 @@ const addDivElement = () => {
       },
       false
   );
+  dropTarget = document.getElementById("div_drager");
+
+  if (builder.length >= 2) {
+    mySortable = Sortable.create(dropTarget, {
+      easing: "cubic-bezier(1, 0, 0, 1)",
+      chosenClass: "sortable-chosen",
+      sort: true,
+      animation: 150,
+
+      onEnd: function (evt) {
+        var oldIndex = evt.oldIndex;
+        var newIndex = evt.newIndex;
+
+        if (oldIndex !== newIndex) {
+          const query = document.querySelector("#div_drager")
+          const childNodes = query.children
+          const builderArray = [...builder]
+          builder = [];
+          for (let i = 0; i < builderArray.length; i++) {
+            const id = childNodes[i].id
+            const chngedEle = builderArray.filter(ele => {
+              return ele.cardId.toString() === id.toString()
+            })
+            builder.push(chngedEle[0])
+          }
+        }
+      },
+    });
+  }
 };
+
 const deleteCard = (e, control) => {
   const shouldDelete = confirm("Do you really want to delete the selected question?\nBy deleting this question you will also be deleting all applicant responses to this question.");
   if (shouldDelete) {
@@ -2354,6 +2395,7 @@ const editRadioOnClick = (e, remove) => {
 };
 
 const PrintFormBuilder = (jsonData, responsesString, pathwaysString) => {
+  mySortable?.option("disabled", true);
   console.log(jsonData)
   console.log(responsesString)
   console.log(pathwaysString)
@@ -2884,7 +2926,6 @@ const validateCheckboxes = (e) => {
 const SaveFormBuilder = () => {
   let is_completed = true;
 
-
   if (builder.length === 0) {
     alert("Please create form");
     return
@@ -2979,11 +3020,12 @@ const SaveFormBuilder = () => {
 };
 
 const LoadFormBuilder = (jsonData) => {
+  mySortable.option("disabled", false);
   builder = [];
 
   //Call API here to load data from database
 
-  if (jsonData != null) {
+  if (jsonData != null && jsonData.length !== 0) {
     let loadedData = JSON.parse(jsonData)
     if (loadedData.questions) {
       builder = loadedData.questions
@@ -3010,6 +3052,8 @@ const createCardFromJSON = (mainDiv, elements) => {
   var selectTag = document.createElement("select");
   var bodyWrapper = document.createElement("div");
   var footerWrapper = document.createElement("div");
+  var actionDragWrapper = document.createElement("div");
+  var imgDrag = document.createElement("img");
   var actionWrapper = document.createElement("div");
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
@@ -3044,6 +3088,9 @@ const createCardFromJSON = (mainDiv, elements) => {
 
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
+  actionDragWrapper.setAttribute("class", "actionDrag-wrapper")
+  imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
+  imgDrag.setAttribute("width", "20");
   actionWrapper.setAttribute("class", "action-wrapper");
   imgDelete.innerText = "delete"
   imgDeleteWrapper.setAttribute("class", "text-center me-2 d-flex align-items-center justify-content-center");
@@ -3075,6 +3122,8 @@ const createCardFromJSON = (mainDiv, elements) => {
   element.appendChild(bodyWrapper);
   element.appendChild(footerWrapper);
   footerWrapper.appendChild(actionWrapper);
+  footerWrapper.appendChild(actionDragWrapper);
+  actionDragWrapper.appendChild(imgDrag);
   actionWrapper.appendChild(imgDeleteWrapper);
   footerWrapper.appendChild(requiredWrapper);
   requiredWrapper.appendChild(footerLabel);
@@ -3084,7 +3133,9 @@ const createCardFromJSON = (mainDiv, elements) => {
   imgDelete.addEventListener("click", (e) => {
     deleteCard(e, element);
   });
-
+  imgDrag.addEventListener("drag", (e) => {
+    dragCard(e, element);
+  });
   inputCheckBox.addEventListener("change", (e) => {
     object.isRequired = e.target.checked;
     RequiredChanged(e, bodyWrapper);

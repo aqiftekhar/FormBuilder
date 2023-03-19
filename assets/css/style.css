@@ -186,6 +186,20 @@
   border-top: 1px solid rgba(165, 164, 164, 0.329);
 }
 
+.footer-wrapper .actionDrag-wrapper {
+  order: 1;
+  margin-right: auto;
+  cursor: move;
+  /* fallback if grab cursor is unsupported */
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.sortable-ghost {
+  opacity: 0.4;
+}
+
 .footer-label {
   margin: 0 !important;
   margin: 0 10px !important;
@@ -194,10 +208,15 @@
 .required-wrapper {
   border-left: 1px solid rgba(128, 128, 128, 0.411);
   margin: 0 5px;
+  order: 3;
 }
 
 .action-wrapper > img {
   margin: 0 10px;
+}
+
+.action-wrapper {
+  order: 2;
 }
 
 .body-wrapper {
@@ -261,5 +280,3 @@
 .btn-remove:hover {
   background-color: rgba(221, 221, 221, 0.397);
 }
-
-.
