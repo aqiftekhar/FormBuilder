@@ -3020,7 +3020,7 @@ const SaveFormBuilder = () => {
 };
 
 const LoadFormBuilder = (jsonData) => {
-  mySortable.option("disabled", false);
+  mySortable?.option("disabled", false);
   builder = [];
 
   //Call API here to load data from database
@@ -3133,9 +3133,10 @@ const createCardFromJSON = (mainDiv, elements) => {
   imgDelete.addEventListener("click", (e) => {
     deleteCard(e, element);
   });
-  imgDrag.addEventListener("drag", (e) => {
-    dragCard(e, element);
-  });
+  // imgDrag.addEventListener("drag", (e) => {
+  //   debugger;
+  //   dragCard(e, element);
+  // });
   inputCheckBox.addEventListener("change", (e) => {
     object.isRequired = e.target.checked;
     RequiredChanged(e, bodyWrapper);
