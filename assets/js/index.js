@@ -3133,6 +3133,38 @@ const createCardFromJSON = (mainDiv, elements) => {
   imgDelete.addEventListener("click", (e) => {
     deleteCard(e, element);
   });
+  dropTarget = document.getElementById("div_drager");
+
+
+  if (builder.length >= 2) {
+    mySortable = Sortable.create(dropTarget, {
+      easing: "cubic-bezier(1, 0, 0, 1)",
+      chosenClass: "sortable-chosen",
+      sort: true,
+      animation: 150,
+
+
+      onEnd: function (evt) {
+        var oldIndex = evt.oldIndex;
+        var newIndex = evt.newIndex;
+
+
+        if (oldIndex !== newIndex) {
+          const query = document.querySelector("#div_drager")
+          const childNodes = query.children
+          const builderArray = [...builder]
+          builder = [];
+          for (let i = 0; i < builderArray.length; i++) {
+            const id = childNodes[i].id
+            const chngedEle = builderArray.filter(ele => {
+              return ele.cardId.toString() === id.toString()
+            })
+            builder.push(chngedEle[0])
+          }
+        }
+      },
+    });
+  }
   // imgDrag.addEventListener("drag", (e) => {
   //   debugger;
   //   dragCard(e, element);
