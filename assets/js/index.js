@@ -39,7 +39,7 @@ const addDivElement = () => {
   var bodyWrapper = document.createElement("div");
   var footerWrapper = document.createElement("div");
   var actionDragWrapper = document.createElement("div");
-  var imgDrag = document.createElement("img");
+  var imgDrag = document.createElement("i");
   var actionWrapper = document.createElement("div");
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
@@ -74,9 +74,11 @@ const addDivElement = () => {
   questionInput.setAttribute("id", "Question_Input_" + controlId);
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
-  actionDragWrapper.setAttribute("class", "actionDrag-wrapper")
-  imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
-  imgDrag.setAttribute("width", "20");
+  actionDragWrapper.setAttribute("class", "actionDrag-wrapper");
+  imgDrag.innerText = "drag_indicator";
+  imgDrag.setAttribute("class", "material-symbols-outlined");
+  // imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
+  // imgDrag.setAttribute("width", "20");
   actionWrapper.setAttribute("class", "action-wrapper");
   imgDelete.innerText = "delete"
   imgDeleteWrapper.setAttribute("class", "text-center me-2 d-flex align-items-center justify-content-center");
@@ -3053,7 +3055,7 @@ const createCardFromJSON = (mainDiv, elements) => {
   var bodyWrapper = document.createElement("div");
   var footerWrapper = document.createElement("div");
   var actionDragWrapper = document.createElement("div");
-  var imgDrag = document.createElement("img");
+  var imgDrag = document.createElement("i");
   var actionWrapper = document.createElement("div");
   var requiredWrapper = document.createElement("div");
   var footerLabel = document.createElement("label");
@@ -3088,9 +3090,11 @@ const createCardFromJSON = (mainDiv, elements) => {
 
   selectTag.setAttribute("class", "select-control");
   bodyWrapper.setAttribute("class", "body-wrapper");
-  actionDragWrapper.setAttribute("class", "actionDrag-wrapper")
-  imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
-  imgDrag.setAttribute("width", "20");
+  actionDragWrapper.setAttribute("class", "actionDrag-wrapper");
+  imgDrag.innerText = "drag_indicator";
+  imgDrag.setAttribute("class", "material-symbols-outlined");
+  // imgDrag.setAttribute("src", "/assets/img/drag-icon.png");
+  // imgDrag.setAttribute("width", "20");
   actionWrapper.setAttribute("class", "action-wrapper");
   imgDelete.innerText = "delete"
   imgDeleteWrapper.setAttribute("class", "text-center me-2 d-flex align-items-center justify-content-center");
